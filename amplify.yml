@@ -4,9 +4,9 @@ frontend:
     # IMPORTANT - Please verify your build commands
     build:
       commands: [
-        'npm i --location=global npm',
-        'npm install --production',
-        'npm run build'
+        'npm i pnpm', # update npm version
+        'pnpm install --prod',
+        'pnpm run build'
       ]
   artifacts:
     # IMPORTANT - Please verify your build output directory

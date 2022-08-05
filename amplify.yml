@@ -4,10 +4,10 @@ frontend:
     # IMPORTANT - Please verify your build commands
     preBuild:
       commands:
-        - pnpm ci
+        - npm install --production
     build:
       commands:
-        - pnpm run build
+        - npm run build
   artifacts:
     # IMPORTANT - Please verify your build output directory
     baseDirectory: /dist

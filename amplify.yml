@@ -2,10 +2,12 @@ version: 1
 frontend:
   phases:
     # IMPORTANT - Please verify your build commands
+    preBuild:
+      commands:
+        - pnpm ci
     build:
-      commands: [
-        'pnpm run build'
-      ]
+      commands:
+        - pnpm run build
   artifacts:
     # IMPORTANT - Please verify your build output directory
     baseDirectory: /dist

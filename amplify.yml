@@ -4,6 +4,7 @@ frontend:
     # IMPORTANT - Please verify your build commands
     preBuild:
       commands:
+        - npm i --location=global npm
         - npm install --production
     build:
       commands:

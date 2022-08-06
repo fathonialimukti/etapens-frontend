@@ -1,6 +1,6 @@
 <script setup>
   import { Amplify } from 'aws-amplify';
-  import awsconfig from './aws-exports';
+  import awsconfig from './aws/aws-exports.cjs';
 
   Amplify.configure(awsconfig);
 </script>

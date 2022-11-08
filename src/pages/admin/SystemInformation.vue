@@ -1,5 +1,5 @@
 <template>
-  <router-view/>
+  System Information
 </template>
 
 <script>

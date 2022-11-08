@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "etapensfrontendcdf2afe1_identitypool_cdf2afe1",
-    "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "etapencdf2afe1",
-    "userPoolName": "etapensfrontendcdf2afe1_userpool_cdf2afe1",
+    "identityPoolName": "etapensfrontend03737d8a_identitypool_03737d8a",
+    "allowUnauthenticatedIdentities": true,
+    "resourceNameTruncated": "etapen03737d8a",
+    "userPoolName": "etapensfrontend03737d8a_userpool_03737d8a",
     "autoVerifiedAttributes": [
       "email"
     ],
@@ -20,8 +20,7 @@
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [],
     "requiredAttributes": [
-      "email",
-      "name"
+      "email"
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
@@ -32,16 +31,30 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "etapencdf2afe1_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "etapen03737d8a_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "cdf2afe1",
-    "resourceName": "etapensfrontendcdf2afe1",
+    "sharedId": "03737d8a",
+    "resourceName": "etapensfrontend03737d8a",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "default",
     "triggers": {},
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
-    "useEnabledMfas": true
+    "useEnabledMfas": true,
+    "authRoleArn": {
+      "Fn::GetAtt": [
+        "AuthRole",
+        "Arn"
+      ]
+    },
+    "unauthRoleArn": {
+      "Fn::GetAtt": [
+        "UnauthRole",
+        "Arn"
+      ]
+    },
+    "breakCircularDependency": true,
+    "dependsOn": []
   }
 }

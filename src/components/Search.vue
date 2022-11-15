@@ -15,16 +15,18 @@
         <input v-model=" title " type="text" class="input input-info w-full" />
 
         <p class="py-4">Teknologi yang digunakan</p>
-        <VueMultiselect v-model=" tech " :options=" techList " :multiple=" true " :taggable=" true " @tag=" addTechList "
-          tag-placeholder="Tambahkan" placeholder="Cari atau tambahkan" />
+        <VueMultiselect v-model=" tech " :options=" techList " :multiple=" true " :searchable=" true "
+          @search-change=" findTechList " placeholder="Cari Teknologi yang terdaftar" label="name" track-by="name" />
 
         <p class="py-4">Jenis Penelitian</p>
-        <VueMultiselect v-model=" categories " :options=" categoryList " :taggable=" true " @tag=" addCategoryList "
-          tag-placeholder="Tambahkan" placeholder="Cari atau tambahkan" />
+        <VueMultiselect v-model=" researchFields " :options=" researchFieldList " :multiple=" true " :searchable=" true "
+          @search-change=" findResearchField " placeholder="Cari Bidang Penelitian yang terdaftar" label="name"
+          track-by="name" />
 
         <p class="py-4">Metode yang digunakan</p>
-        <VueMultiselect v-model=" method " :options=" methodList " :multiple=" true " :taggable=" true "
-          @tag=" addMethodList " tag-placeholder="Tambahkan" placeholder="Cari atau tambahkan" />
+        <VueMultiselect v-model=" methods " :options=" methodList " :multiple=" true " :searchable=" true "
+          @search-change=" findMethod " placeholder="Cari Metode Penelitian yang terdaftar" label="name"
+          track-by="name" />
 
         <div class="modal-action">
           <label for="advanced search" class="btn btn-error">Cancel</label>
@@ -39,42 +41,87 @@
 
 <script>
 import VueMultiselect from 'vue-multiselect'
+import axios from 'axios'
+import { projectService } from '../constant/endpoint'
 
 export default {
   data () {
     return {
       title: undefined,
       tech: [],
-      categories: null,
-      method: [],
-      techList: [ 'php', 'mysql', 'laravel' ],
-      categoryList: [ 'egov', 'karya cipta' ],
-      methodList: [ 'fuzzy', 'lainnya' ],
+      researchFields: [],
+      methods: [],
+      techList: [],
+      researchFieldList: [],
+      methodList: [],
     }
   },
   components: {
     VueMultiselect
   },
+  mounted () {
+    this.findMethod()
+    this.findResearchField()
+    this.findTechList()
+  },
   methods: {
     submit () {
+      const tech = []
+      for ( const key of this.tech ) {
+        tech.push( key.name )
+      }
+      const researchFields = []
+      for ( const key of this.researchFields ) {
+        researchFields.push( key.name )
+      }
+      const methods = []
+      for ( const key of this.methods ) {
+        methods.push( key.name )
+      }
       this.$emit( 'submit', {
         title: this.title,
-        tech: this.tech,
-        categories: this.categories,
-        method: this.method
+        tech: tech,
+        researchFields: researchFields,
+        methods: methods
       } )
     },
-    addTechList ( newTag ) {
-      this.techList.push( newTag )
-      this.tech.push( newTag )
+
+
+    async findTechList ( search ) {
+      await axios.get(
+        projectService + 'find-tech-list',
+        { params: { name: search } }
+      )
+        .then( ( response ) => {
+          this.techList = response.data
+        } )
+        .catch( ( response ) => {
+          this.techList[ 0 ] = response.error
+        } )
     },
-    addCategoryList ( newTag ) {
-      this.categoryList.push( newTag )
-      this.categories = newTag 
+    async findResearchField ( search ) {
+      await axios.get(
+        projectService + 'find-research-field',
+        { params: { name: search } }
+      )
+        .then( ( response ) => {
+          this.researchFieldList = response.data
+        } )
+        .catch( ( response ) => {
+          this.researchFieldList[ 0 ] = response.error
+        } )
     },
-    addMethodList ( newTag ) {
-      this.methodList.push( newTag )
-      this.method.push( newTag )
+    async findMethod ( search ) {
+      await axios.get(
+        projectService + 'find-research-method',
+        { params: { name: search } }
+      )
+        .then( ( response ) => {
+          this.methodList = response.data
+        } )
+        .catch( ( response ) => {
+          this.methodList[ 0 ] = response.error
+        } )
     },
 
   }

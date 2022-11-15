@@ -115,7 +115,7 @@
   <h2 class="card-title">Discussion</h2>
   <FormKit v-if=" store.user.username " type="form" id="registration" :form-class=" submitted ? 'hide' : 'show' "
     submit-label="Post Comment" @submit=" postComment " #default=" { value } " :config=" { preserveErrors: true } ">
-    <FormKit type="textarea" name="comment" label="Comment" validation="required" />
+    <FormKit type="textarea" name="comment" label="Comment" validation="required"/>
   </FormKit>
 
   <ul>

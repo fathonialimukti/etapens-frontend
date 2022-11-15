@@ -29,7 +29,7 @@
           <p class="font-bold"> Description: </p>
           <p>{{ user?.project.description}}</p>
           <p class="font-bold"> Tech used: </p>
-          <p>{{ user?.project.tech.join(", ")}}</p>
+          <!-- <p>{{ user?.project.tech.join(", ")}}</p> -->
           <p class="font-bold"> Status: </p>
           <p>{{ user?.project.isActive ? "Active" : "Inactive" }}</p>
           <div class="card-actions justify-end">

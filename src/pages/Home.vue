@@ -39,15 +39,15 @@ export default {
       if ( this.page < 1 || this.page > this.totalPage ) this.page = 1
       query.page = this.page
 
-
       if ( advancedSearch ) {
         if ( advancedSearch.title ) query.title = advancedSearch.title
-        if ( advancedSearch.tech ) query.tech = advancedSearch.tech
-        if ( advancedSearch.categories ) query.categories = advancedSearch.categories
-        if ( advancedSearch.method ) query.method = this.method
+        if ( advancedSearch.tech.length != 0 ) query.tech = advancedSearch.tech
+        if ( advancedSearch.researchFields != 0 ) query.researchFields = advancedSearch.researchFields
+        if ( advancedSearch.methods.length != 0 ) query.methods = this.methods
       }
 
-
+      console.log( query );
+      
       axios
         .get( projectService, {
           params: query

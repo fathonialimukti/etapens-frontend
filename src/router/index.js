@@ -54,7 +54,7 @@ const routes = [
             }, ]
         }, {
             path: 'lecturer',
-            meta: { lecturer: true },
+            meta: { lecturers: true },
             children: [ {
                 name: 'Lecturer Dashboard',
                 path: '',
@@ -105,7 +105,7 @@ router.beforeEach( ( to ) => {
     if ( to.meta.student && !store.user.studentAccount.isActive ) return '/'
     if ( to.meta.lecturer && !store.user.lecturerAccount.isActive ) return '/'
     if ( to.meta.admin && store.user.role != 'Admin' ) return '/'
-    if ( to.meta.register && store.user.role) return '/'
+    if ( to.meta.register && store.user.role ) return '/'
 } )
 
 export default router

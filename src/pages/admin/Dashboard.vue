@@ -159,8 +159,7 @@ export default {
             if ( this.name ) query.name = this.name
             if ( this.isActive ) query.isActive = this.isActive
 
-            axios
-                .get( projectService + 'admin/list-project', {
+            axios.get( projectService + 'admin/list-project', {
                     params: query
                 } )
                 .then( response => {

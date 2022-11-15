@@ -10,19 +10,16 @@
                 <FormKit type="select" name="type" label="Tipe Aplikasi" validation="" :options="{Generals: 'Generals', StaticWeb: 'Website Static', SelfHostedWeb: 'Website Self Hosted'}"/>
 
                 <p class="py-4">Dosen Pembimbing</p>
-                <VueMultiselect v-model=" lecturer " :options="lecturerList" :multiple=" true " :searchable="searchable" @search-change="asyncFind" placeholder="Cari Nama" label="name" track-by="name" />
+                <VueMultiselect v-model=" lecturers " :options="lecturerList" :multiple=" true " :searchable="true" @search-change="findLecturer" placeholder="Cari Nama" label="name" track-by="name"/>
                 
                 <p class="py-4">Teknologi yang digunakan</p>
-                <VueMultiselect v-model=" tech " :options=" techList " :multiple=" true " :taggable=" true " @tag=" addTechList "
-                tag-placeholder="Tambahkan" placeholder="Cari atau tambahkan" />
+                <VueMultiselect v-model=" tech " :options=" techList " :multiple=" true " :searchable="true" @search-change=" findTechList " placeholder="Cari Teknologi yang terdaftar" label="name" track-by="name" />
 
                 <p class="py-4">Jenis Penelitian</p>
-                <VueMultiselect v-model=" categories " :options=" categoryList " :taggable=" true " @tag=" addCategoryList "
-                tag-placeholder="Tambahkan" placeholder="Cari atau tambahkan" />
+                <VueMultiselect v-model=" researchFields " :multiple=" true " :options=" researchFieldList " :searchable="true" @search-change=" findResearchField " placeholder="Cari Bidang Penelitian yang terdaftar"  label="name" track-by="name"  />
 
                 <p class="py-4">Metode yang digunakan</p>
-                <VueMultiselect v-model=" methods " :options=" methodList " :multiple=" true " :taggable=" true "
-                @tag=" addMethodList " tag-placeholder="Tambahkan" placeholder="Cari atau tambahkan" />
+                <VueMultiselect v-model=" methods " :options=" methodList " :multiple=" true " :searchable="true" @search-change=" findMethod " placeholder="Cari Metode Penelitian yang terdaftar"  label="name" track-by="name"  />
                 <br>
 
                 <FormKit v-if="value.type == 'StaticWeb'" type="file" name="app" label="Folder Hasil Akhir Aplikasi" accept=".pdf" multiple webkitdirectory help="Nama folder bebas. Harus terdapat index.html di root"/>
@@ -40,7 +37,7 @@
 <script>
 import { Storage } from 'aws-amplify'
 import axios from 'axios'
-import { controlService, projectService } from '../../constant/endpoint'
+import { projectService } from '../../constant/endpoint'
 import useAuthStore from '../../stores/auth'
 import VueMultiselect from 'vue-multiselect'
 
@@ -50,26 +47,28 @@ export default {
         return {
             status: null,
             store: useAuthStore(),
-            lecturer: null,
+            lecturers: null,
             lecturerList: [],
-            tech: [],
-            categories: null,
-            methods: [],
-            techList: [ 'php', 'mysql', 'laravel' ],
-            categoryList: [ 'egov', 'karya cipta' ],
-            methodList: [ 'fuzzy', 'lainnya' ],
+            tech: null,
+            researchFields: null,
+            methods: null,
+            techList: [],
+            researchFieldList: [],
+            methodList: [],
         }
     },
     methods: {
         async submit ( project ) {
             console.log( project )
-            project.student = {}
-            project.student.connect = { id: this.store.user.studentAccount.id }
+            // project.student = {}
+            // project.student.connect = { id: this.store.user.studentAccount.id }
+            project.studentId = this.store.user.studentAccount.id
+            console.log( project )
 
             project.tech = this.tech
-            project.categories = this.categories
-            project.method = this.method
-            project.lecturer = this.lecturer
+            project.researchFields = this.researchFields
+            project.methods = this.methods
+            project.lecturers = this.lecturers
 
             const documents = project.documents
             const images = project.images
@@ -78,9 +77,6 @@ export default {
             project.documents = []
             project.images = []
             delete project.app
-
-            const lowercased = project.tech.map( tech => tech.toLowerCase() )
-            project.tech = lowercased
 
             const baseUrl = "https://etapens-storage140101-dev.s3.ap-southeast-1.amazonaws.com/public/"
 
@@ -160,49 +156,73 @@ export default {
                         },
                     } )
                 };
+
+                // update project
+                await axios( {
+                    method: "patch",
+                    url: projectService + "student/project",
+                    data: project,
+                    headers: { "Content-Type": "application/json" },
+                } )
+                    .then( ( response ) => {
+                        this.status = response.message
+                    } )
+                    .catch( ( response ) => {
+                        this.status = response.message
+                        return
+                    } )
             }
 
-            // update project
-            await axios( {
-                method: "patch",
-                url: projectService + "student/project",
-                data: project,
-                headers: { "Content-Type": "application/json" },
-            } )
+            this.$router.push( { name: 'Student Dashboard' } )
+        },
+
+
+        async findTechList ( search ) {
+            await axios.get(
+                projectService + 'find-tech-list',
+                { params: { name: search } }
+            )
                 .then( ( response ) => {
-                    this.status = response.message
-                    this.$router.push( { name: 'Student Dashboard' } )
+                    this.techList = response.data
                 } )
                 .catch( ( response ) => {
-                    this.status = response.message
-                    return
+                    this.techList[ 0 ] = response.error
                 } )
         },
-
-        addTechList ( newTag ) {
-            this.techList.push( newTag )
-            this.tech.push( newTag )
+        async findResearchField ( search ) {
+            await axios.get(
+                projectService + 'find-research-field',
+                { params: { name: search } }
+            )
+                .then( ( response ) => {
+                    this.researchFieldList = response.data
+                } )
+                .catch( ( response ) => {
+                    this.researchFieldList[ 0 ] = response.error
+                } )
         },
-        addCategoryList ( newTag ) {
-            this.categoryList.push( newTag )
-            this.categories = newTag
+        async findMethod ( search ) {
+            await axios.get(
+                projectService + 'find-research-method',
+                { params: { name: search } }
+            )
+                .then( ( response ) => {
+                    this.methodList = response.data
+                } )
+                .catch( ( response ) => {
+                    this.methodList[ 0 ] = response.error
+                } )
         },
-        addMethodList ( newTag ) {
-            this.methodList.push( newTag )
-            this.method.push( newTag )
-        },
-
-        async asyncFind ( lecturerName ) {
+        async findLecturer ( lecturerName ) {
             await axios.get(
                 projectService + 'find-lecturer',
                 { params: { name: lecturerName } }
             )
                 .then( ( response ) => {
                     this.lecturerList = response.data
-                    console.log(response);
                 } )
                 .catch( ( response ) => {
-                    this.lecturerList[0] = response.error
+                    this.lecturerList[ 0 ] = response.error
                 } )
         }
     },

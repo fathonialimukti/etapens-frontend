@@ -3,18 +3,18 @@
     <div class="card-body w-full">
       <div class="card-actions justify-between">
         <h2 class="card-title">Project List</h2>
-        <div v-if="!user?.project" class="dropdown dropdown-end">
+        <div class="dropdown dropdown-end">
           <label tabindex="0" class="btn btn-warning m-1">Create new</label>
           <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li v-if="!user?.project">
+            <li v-if="user?.project">
               <router-link :to="{ name: 'Create Project' }">Project</router-link>
             </li>
-            <!-- <li v-if="!user?.backend">
+            <li v-if="user?.backend">
               <router-link :to="{ name: 'Create Backend' }">Backend</router-link>
             </li>
-            <li v-if="!user?.database">
+            <li v-if="user?.database">
               <router-link :to="{ name: 'Create Database' }">Database</router-link>
-            </li> -->
+            </li>
           </ul>
         </div>
       </div>
@@ -42,7 +42,7 @@
       <div v-if="user?.backend" class="card card-compact w-auto bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">Backend!</h2>
-          <p>{{ user?.backend.description}}</p>
+          <p>{{ user?.backend}}</p>
           <p></p>
           <div class="card-actions justify-end">
             <button class="btn btn-primary">Edit</button>
@@ -54,7 +54,7 @@
       <div v-if="user?.database" class="card card-compact w-auto bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">Database Request!</h2>
-          <p>{{ user?.database.dbname}}</p>
+          <p>{{ user?.database}}</p>
           <div class="card-actions justify-end">
             <button class="btn btn-primary">Edit</button>
           </div>

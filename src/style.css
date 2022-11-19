@@ -24,6 +24,9 @@
   padding-top: 1.5rem;
   padding-bottom: 1rem;
   padding: 3rem;
+
+  /* Formkit css */
+  --fk-max-width-input: 100% !important;
 }
 
 a {

@@ -1,59 +1,67 @@
-<template>
-    <div class="card card-compact w-auto bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title">Create new Backend</h2>
-            <!-- appName, description, sourceCode -->
-            <div class="form-control w-full max-w-xs">
-                <label class="label"> <span class="label-text">Application Name</span> </label>
-                <input :value="form.appName" @input="event => form.appName = event.target.value" type="text"
-                    placeholder="appName" class="input input-info w-full max-w-xs" />
-
-                <label class="label"> <span class="label-text">Description</span> </label>
-                <input :value="form.description" @input="event => form.description = event.target.value" type="text"
-                    placeholder="description" class="input input-info w-full max-w-xs" />
-
-                <label class="label"> <span class="label-text">Source Code</span> </label>
-                <input :value="form.sourceCode" @input="event => form.sourceCode = event.target.value" type="text"
-                    placeholder="Source Code" class="input input-info w-full max-w-xs" />
-            </div>
-
-            <div class="card-actions justify-end">
-                <button @click="send" class="btn btn-primary">Create</button>
-            </div>
+<template lang="">
+    <div class="card bg-slate-200 p-4">
+        <div class="bg-white p-3 rounded-lg">
+            <FormKit type="form" id="project" submit-label="Register" @submit="submit" :actions="false" #default="{ value }" :config="{ preserveErrors: true }">
+                <FormKit type="textarea" name="description" label="Deskripsi" validation="" />
+                <FormKit type="url" name="sourceCode" label="Sumber data" help="Link github"  validation="required|url" />
+                
+                <VueMultiselect v-model=" port " :options=" portList " :multiple=" false " :searchable="true" @search-change=" findPort " placeholder="Cari port yang tersedia" label="number" track-by="number"/>
+                <br/>
+                <FormKit type="submit" />
+                <pre wrap>{{ status }}</pre>
+            </FormKit>
         </div>
     </div>
 </template>
 <script>
-import useAuthStore from "../../stores/auth"
-import axios from "axios"
+import axios from 'axios'
+import { projectService } from '../../constant/endpoint'
+import useAuthStore from '../../stores/auth'
+import VueMultiselect from 'vue-multiselect'
+
 export default {
+    components: { VueMultiselect },
     data () {
         return {
-            form: {},
-            store: useAuthStore()
+            status: null,
+            store: useAuthStore(),
+            port: null,
+            portList: [],
         }
     },
     methods: {
-        send () {
-            let self = this
-            this.form.user = this.store.user._id
-            axios( {
-                method: "post",
-                url: "http://localhost:4000/project",
-                data: this.form,
-                headers: { "Content-Type": "application/json" },
-                params: { type: 'backend' }
-            } )
-                .then( function ( response ) {
-                    if ( response.statusText == 'OK' ) self.$router.push( { name: 'User Dashboard' } )
+        async submit ( backend ) {
+
+            backend.studentId = this.store.user.studentAccount.id
+            backend.port = this.port
+            await axios.post( 
+                projectService + "student/backend",
+                backend,
+             )
+                .then( ( response ) => {
+                    this.status = response.message
                 } )
-                .catch( function ( response ) {
-                    console.log( response )
+                .catch( ( response ) => {
+                    this.status = response.message
+                    return
+                } )
+
+            this.$router.push( { name: 'Student Dashboard' } )
+        },
+        async findPort ( number ) {
+            await axios.get(
+                projectService + 'find-available-port',
+                { params: { number } }
+            )
+                .then( ( response ) => {
+                    this.portList = response.data
+                    console.log(response.data,this.portList);
                 } )
         },
     },
 }
 </script>
-<style>
+
+<style src="vue-multiselect/dist/vue-multiselect.css">
 
 </style>

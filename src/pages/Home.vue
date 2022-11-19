@@ -46,8 +46,6 @@ export default {
         if ( advancedSearch.methods.length != 0 ) query.methods = this.methods
       }
 
-      console.log( query );
-      
       axios
         .get( projectService, {
           params: query

@@ -49,7 +49,7 @@ const routes = [
                 component: () => import( '../pages/student/CreateBackend.vue' )
             }, {
                 name: 'Create Database',
-                path: 'create-project',
+                path: 'create-database',
                 component: () => import( '../pages/student/CreateDatabase.vue' )
             }, ]
         }, {
@@ -105,7 +105,7 @@ router.beforeEach( ( to ) => {
     if ( to.meta.student && !store.user.studentAccount.isActive ) return '/'
     if ( to.meta.lecturer && !store.user.lecturerAccount.isActive ) return '/'
     if ( to.meta.admin && store.user.role != 'Admin' ) return '/'
-    if ( to.meta.register && store.user.role ) return '/'
+    if ( to.meta.register && store.user.role != 'Guest' ) return '/'
 } )
 
 export default router

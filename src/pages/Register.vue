@@ -1,56 +1,55 @@
 <template>
-    <div class="flex flex-wrap bg-slate-100 p-3 rounded-lg">
-        <div class="w-full items-center">
-            <div class="tabs">
-                <a class="tab tab-lifted flex-auto" v-on:click="toggleTabs(1)"
-                    v-bind:class="{'text-blue-600 bg-white': openTab !== 1, 'text-white bg-blue-600': openTab === 1}">
-                    Mahasiswa
-                </a>
-                <a class="tab tab-lifted flex-auto" v-on:click="toggleTabs(2)"
-                    v-bind:class="{'text-yellow-600 bg-white': openTab !== 2, 'text-white bg-yellow-600': openTab === 2}">
-                    Dosen
-                </a>
-            </div>
-            <div class="relative flex flex-col min-w-0 break-words bg-white mb-6 shadow-lg rounded w-96">
-                <div class="px-4 py-5">
-                    <div class="tab-content tab-space">
-                        <div v-bind:class="{'hidden': openTab !== 1, 'block': openTab === 1}">
-                            <FormKit type="form" id="registration" :form-class="submitted ? 'hide' : 'show'"
-                                submit-label="Register" @submit="submitMahasiswa" :actions="false" #default="{ value }"
-                                :config="{ preserveErrors: true }">
-                                <hr />
-                                <FormKit type="text" name="name" label="Nama" validation="required" />
-                                <FormKit type="number" name="nrp" label="Nrp" validation="required" />
-                                <FormKit type="textarea" name="bio" label="Bio" validation="required" />
+    <v-card>
+        <v-tabs v-model=" tab " bg-color="primary" fixed-tabs>
+            <v-tab value="Mahasiswa">Mahasiswa</v-tab>
+            <v-tab value="Dosen">Dosen</v-tab>
+        </v-tabs>
 
-                                <FormKit type="file" name="image" label="Foto" help="Hanya file dengan format jpg"
-                                    validation="required" accept=".jpg" />
+        <v-card-text>
+            <v-window v-model=" tab ">
+                <v-window-item value="Mahasiswa">
+                    <v-form ref="form" v-model=" valid " lazy-validation>
+                        <v-text-field v-model=" newStudent.name " :rules=" [ v => !!v || 'Name is required' ] " label="Nama"
+                            required color="secondary" bg-color="amber-lighten-4"></v-text-field>
 
-                                <FormKit type="submit" label="Register" />
-                                <pre wrap>{{ status }}</pre>
-                            </FormKit>
-                        </div>
-                        <div v-bind:class="{'hidden': openTab !== 2, 'block': openTab === 2}">
-                            <FormKit type="form" id="registration" :form-class="submitted ? 'hide' : 'show'"
-                                submit-label="Register" @submit="submitDosen" :actions="false" #default="{ value }"
-                                :config="{ preserveErrors: true }">
-                                <hr />
-                                <FormKit type="text" name="name" label="Nama" validation="required" />
-                                <FormKit type="number" name="nip" label="NIP" validation="required" />
-                                <FormKit type="textarea" name="bio" label="Bio" validation="required" />
+                        <v-text-field v-model=" newStudent.nrp " :rules=" [ v => !!v || 'Nrp is required' ] " label="NRP"
+                            type="number" required color="secondary" bg-color="amber-lighten-4"></v-text-field>
 
-                                <FormKit type="file" name="image" label="Foto" help="Hanya file dengan format jpg"
-                                    validation="required" accept=".jpg" />
+                        <v-textarea v-model=" newStudent.bio " :rules=" [ v => !!v || 'Bio is required' ] " label="Bio"
+                            required color="secondary" bg-color="amber-lighten-4">
+                        </v-textarea>
 
-                                <FormKit type="submit" label="Register" />
-                                <pre wrap>{{ status }}</pre>
-                            </FormKit>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <v-file-input v-model=" newStudent.image " label="Image" variant="filled"
+                            prepend-icon="mdi-camera" color="secondary" bg-color="amber-lighten-4"></v-file-input>
+
+                        <v-btn color="success" class="mr-4" @click=" submitMahasiswa ">
+                            Submit
+                        </v-btn>
+                    </v-form>
+                </v-window-item>
+
+                <v-window-item value="Dosen">
+                    <v-form ref="form" v-model=" valid " lazy-validation>
+                        <v-text-field v-model=" newLecturer.name " :rules=" [ v => !!v || 'Name is required' ] " label="Nama" required
+                            color="secondary" bg-color="amber-lighten-4"></v-text-field>
+                    
+                        <v-text-field v-model=" newLecturer.nip " :rules=" [ v => !!v || 'Nip is required' ] " label="Nip" type="number"
+                            required color="secondary" bg-color="amber-lighten-4"></v-text-field>
+                    
+                        <v-textarea v-model=" newLecturer.bio " :rules=" [ v => !!v || 'Bio is required' ] " label="Bio" required
+                            color="secondary" bg-color="amber-lighten-4">
+                        </v-textarea>
+                    
+                        <v-file-input v-model=" newLecturer.image " label="Image" variant="filled" prepend-icon="mdi-camera" color="secondary" bg-color="amber-lighten-4"></v-file-input>
+                    
+                        <v-btn color="success" class="mr-4" @click=" submitDosen ">
+                            Submit
+                        </v-btn>
+                    </v-form>
+                </v-window-item>
+            </v-window>
+        </v-card-text>
+    </v-card>
 </template>
 
 <script>
@@ -60,38 +59,43 @@ import axios from 'axios'
 import { projectService } from '../constant/endpoint'
 
 const store = useAuthStore()
-const studentAccount = {
-    user: {
-        connect: {
-            id: store.user.id
-        }
-    }
-}
 const baseUrl = "https://etapens-storage140101-dev.s3.ap-southeast-1.amazonaws.com/public/"
 
 export default {
     data () {
         return {
-            openTab: 1,
-            studentAccount,
-            status: undefined
+            tab: null,
+            status: undefined,
+            newStudent: {
+                name: null,
+                nrp: null,
+                bio: null,
+                image: [],
+                userId: store.user.id
+            },
+            newLecturer: {
+                name: null,
+                nip: null,
+                bio: null,
+                image: [],
+                userId: store.user.id
+            }
         }
     },
     methods: {
-        toggleTabs ( tabNumber ) {
-            this.openTab = tabNumber
-        },
-        async submitMahasiswa ( values ) {
-            await this.upload( values.image[ 0 ] )
+        async submitMahasiswa () {
+            const { valid } = await this.$refs.form.validate()
 
-            values.image = baseUrl + store.user.username + '/profile.png'
-            values.user = {}
-            values.user.connect = { id: store.user.id }
+            if ( !valid ) return
+
+            await this.upload( this.newStudent.image[ 0 ] )
+
+            this.newStudent.image = baseUrl + store.user.username + '/profile.png'
 
             await axios( {
                 method: "post",
                 url: projectService + "student/create",
-                data: values,
+                data: this.newStudent,
                 headers: { "Content-Type": "application/json" },
             } )
                 .then( ( response ) => {
@@ -104,9 +108,8 @@ export default {
             this.$router.push( { name: 'Home' } )
         },
         async upload ( image ) {
-            await Storage.put( `${ store.user.username }/profile.png`, image.file, {
+            await Storage.put( `${ store.user.username }/profile.png`, image, {
                 acl: "public-read",
-                contentType: image.file.type,
                 progressCallback: ( progress ) => {
                     this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
                 },
@@ -118,17 +121,18 @@ export default {
                 },
             } )
         },
-        async submitDosen ( values ) {
-            await this.upload( values.image[ 0 ] )
+        async submitDosen () {
+            const { valid } = await this.$refs.form.validate()
 
-            values.image = baseUrl + store.user.username + '/profile.png'
-            values.user = {}
-            values.user.connect = { id: store.user.id }
+            if ( !valid ) return
+            await this.upload( this.newLecturer.image[ 0 ] )
+
+            this.newLecturer.image = baseUrl + store.user.username + '/profile.png'
 
             await axios( {
                 method: "post",
                 url: projectService + "lecturer/create",
-                data: values,
+                data: this.newLecturer,
                 headers: { "Content-Type": "application/json" },
             } )
                 .then( ( response ) => {

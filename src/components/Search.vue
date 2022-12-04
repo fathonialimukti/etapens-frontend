@@ -1,63 +1,71 @@
 <template>
-  <div class="bg-slate-200 rounded-lg shadow-lg p-2 md:flex md:flex-row gap-2 grid relative">
-    <input v-model=" title " @input=" $emit( 'update:title', $event.target.value ) " type="text"
-      placeholder="Pencarian Berdasarkan Judul" class="input input-info w-full" />
+    <!-- <v-text-field v-model=" title " label="Pencarian Judul" class="-mb-5" density="compact" @input=" submit "></v-text-field> -->
 
-    <label for="advanced search" class="btn btn-warning">Advanced search</label>
+    <v-text-field v-model=" title " @input="submit" variant="outlined" label="Cari Judul" prepend-inner-icon="mdi-magnify"
+      append-inner-icon="mdi-nut" single-line hide-details @click:append-inner=" dialog = !dialog "></v-text-field>
 
-    <!-- Put this part before </body> tag -->
-    <input type="checkbox" id="advanced search" class="modal-toggle" />
-    <div class="modal ">
-      <div class="modal-box w-11/12 max-w-5xl overflow-visible">
-        <h3 class="font-bold text-lg">Advanced Search</h3>
+    <v-dialog v-model=" dialog " persistent>
+      <v-card>
+        <v-card-title>
+          <center class="text-h5">Advanced Search</center>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-text-field v-model=" title " label="Judul Tugas Akhir"></v-text-field>
 
-        <p class="py-4">Judul</p>
-        <input v-model=" title " type="text" class="input input-info w-full" />
+            <v-autocomplete label="Teknologi yang digunakan" v-model=" tech " v-model:search=" searchTech "
+              @input=" findTechList " :items=" techList " item-title="name"
+              placeholder="Start typing then enter search" prepend-icon="mdi-database-search"
+              chips closable-chips
+              return-object multiple hide-no-data hide-selected>
+            </v-autocomplete>
 
-        <p class="py-4">Teknologi yang digunakan</p>
-        <VueMultiselect v-model=" tech " :options=" techList " :multiple=" true " :searchable=" true "
-          @search-change=" findTechList " placeholder="Cari Teknologi yang terdaftar" label="name" track-by="name" />
+            <v-autocomplete label="Jenis Penelitian" v-model=" researchFields " v-model:search=" searchResearchFields "
+              @input=" findResearchField " :items=" researchFieldList " item-title="name"
+              placeholder="Start typing then enter search" prepend-icon="mdi-tools" chips closable-chips return-object
+              multiple hide-no-data hide-selected>
+            </v-autocomplete>
 
-        <p class="py-4">Jenis Penelitian</p>
-        <VueMultiselect v-model=" researchFields " :options=" researchFieldList " :multiple=" true " :searchable=" true "
-          @search-change=" findResearchField " placeholder="Cari Bidang Penelitian yang terdaftar" label="name"
-          track-by="name" />
+            <v-autocomplete label="Metode yang digunakan" v-model=" methods " v-model:search=" searchMethods "
+              @input=" findMethod " :items=" methodList " item-title="name"
+              placeholder="Start typing then enter search" prepend-icon="mdi-account-question" chips closable-chips
+              return-object multiple hide-no-data hide-selected>
+            </v-autocomplete>
 
-        <p class="py-4">Metode yang digunakan</p>
-        <VueMultiselect v-model=" methods " :options=" methodList " :multiple=" true " :searchable=" true "
-          @search-change=" findMethod " placeholder="Cari Metode Penelitian yang terdaftar" label="name"
-          track-by="name" />
-
-        <div class="modal-action">
-          <label for="advanced search" class="btn btn-error">Cancel</label>
-          <label for="advanced search" @click=" submit " class="btn btn-info">Search</label>
-        </div>
-      </div>
-    </div>
-
-    <button @click=" submit " class="btn btn-info">Search</button>
-  </div>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click=" dialog = false ">
+            Close
+          </v-btn>
+          <v-btn color="blue-darken-1" variant="text" @click=" submit(); dialog = false ">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 </template>
 
 <script>
-import VueMultiselect from 'vue-multiselect'
 import axios from 'axios'
 import { projectService } from '../constant/endpoint'
 
 export default {
   data () {
     return {
+      dialog: false,
       title: undefined,
       tech: [],
       researchFields: [],
       methods: [],
+      searchTech: null,
+      searchResearchFields: null,
+      searchMethods: null,
       techList: [],
       researchFieldList: [],
       methodList: [],
     }
-  },
-  components: {
-    VueMultiselect
   },
   mounted () {
     this.findMethod()
@@ -87,10 +95,10 @@ export default {
     },
 
 
-    async findTechList ( search ) {
+    async findTechList () {
       await axios.get(
         projectService + 'find-tech-list',
-        { params: { name: search } }
+        { params: { name: this.searchTech } }
       )
         .then( ( response ) => {
           this.techList = response.data
@@ -99,10 +107,10 @@ export default {
           this.techList[ 0 ] = response.error
         } )
     },
-    async findResearchField ( search ) {
+    async findResearchField () {
       await axios.get(
         projectService + 'find-research-field',
-        { params: { name: search } }
+        { params: { name: this.searchResearchFields } }
       )
         .then( ( response ) => {
           this.researchFieldList = response.data
@@ -111,10 +119,10 @@ export default {
           this.researchFieldList[ 0 ] = response.error
         } )
     },
-    async findMethod ( search ) {
+    async findMethod () {
       await axios.get(
         projectService + 'find-research-method',
-        { params: { name: search } }
+        { params: { name: this.searchMethods } }
       )
         .then( ( response ) => {
           this.methodList = response.data
@@ -128,6 +136,3 @@ export default {
 }
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.css">
-
-</style>

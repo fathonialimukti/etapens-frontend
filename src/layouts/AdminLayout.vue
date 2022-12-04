@@ -1,66 +1,73 @@
 <template>
-  <Navbar />
-  <sidebar-menu :menu=" navigation " />
-  <router-view />
-  <Footer />
+  <v-app :theme=" theme ">
+
+    <v-app-bar :elevation=" 2 ">
+      <v-app-bar-nav-icon variant="text" @click.stop=" drawer = !drawer "></v-app-bar-nav-icon>
+
+      <v-app-bar-title>
+        <router-link to="/">Etalase Tugas Akhir</router-link>
+      </v-app-bar-title>
+
+      <v-btn :icon=" theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night' " @click=" themeSwitch " />
+
+      <v-btn v-if=" !store.user.id " variant="outlined" @click=" login ">Login</v-btn>
+      <Avatar v-else></Avatar>
+
+    </v-app-bar>
+
+    <v-navigation-drawer v-model=" drawer ">
+
+      <v-list :lines=" false " nav>
+        <router-link v-for="( navigation, i ) in adminNavigation" :key=" i " :to=" { name: navigation.name } ">
+          <v-list-item :value=" navigation.name " active-color="blue">
+            <template v-slot:prepend>
+              <v-icon :icon=" navigation.icon "></v-icon>
+            </template>
+
+            <v-list-item-title v-text=" navigation.name "></v-list-item-title>
+          </v-list-item>
+        </router-link>
+      </v-list>
+
+    </v-navigation-drawer>
+
+    <v-main>
+      <v-container>
+        <router-view />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import Navbar from "../components/Navbar.vue"
-import Footer from "../components/Footer.vue"
-import { SidebarMenu } from 'vue-sidebar-menu'
-import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
+import { ref } from 'vue'
+import useAuthStore from "../stores/auth"
+import Avatar from '../components/Avatar.vue'
 
-const navigation = [ {
-  header: 'Main Navigation',
-  hiddenOnCollapse: true
-}, {
-  href: '/admin',
-  title: "Admin Dashboard",
-  icon: 'fa fa-user'
-}, {
-  href: '/admin/list-backend',
-  title: "List Backend",
-  icon: 'fa fa-user',
-}, {
-  href: '/admin/list-database',
-  title: "List Database Request",
-  icon: 'fa fa-user',
-}, {
-  href: '/admin/list-student',
-  title: "List Student",
-  icon: 'fa fa-user',
-}, {
-  href: '/admin/list-lecturer',
-  title: "List Lecturer",
-  icon: 'fa fa-user',
-}, {
-  href: '/admin/system-information',
-  title: "System Information",
-  icon: 'fa fa-user',
-} ]
-
+const theme = ref( 'light' )
 
 export default {
-  components: {
-    Navbar,
-    Footer,
-    SidebarMenu
-  },
   data () {
     return {
-      navigation,
+      theme,
+      drawer: null,
+      store: useAuthStore(),
+      adminNavigation: [
+        { name: 'Admin Dashboard', icon: 'mdi-monitor-dashboard' },
+        { name: 'List Frontend', icon: 'mdi-arrange-bring-forward' },
+        { name: 'List Backend', icon: 'mdi-arrange-send-backward' },
+        { name: 'List Database', icon: 'mdi-database' },
+        { name: 'List Student', icon: 'mdi-account-group' },
+        { name: 'List Lecturer', icon: 'mdi-human-male-board-poll' },
+      ]
     }
   },
+  components: {
+    Avatar
+  },
+  methods: {
+    themeSwitch () { theme.value = theme.value === 'light' ? 'dark' : 'light' },
+    login () { this.$router.push( { name: 'Login' } ) }
+  }
 }
 </script>
-
-<style >
-.vsm--menu {
-  margin-top: 6rem !important;
-}
-
-.v-sidebar-menu {
-  z-index: 20;
-}
-</style>

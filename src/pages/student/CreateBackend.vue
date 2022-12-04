@@ -1,67 +1,71 @@
 <template lang="">
-    <div class="card bg-slate-200 p-4">
-        <div class="bg-white p-3 rounded-lg">
-            <FormKit type="form" id="project" submit-label="Register" @submit="submit" :actions="false" #default="{ value }" :config="{ preserveErrors: true }">
-                <FormKit type="textarea" name="description" label="Deskripsi" validation="" />
-                <FormKit type="url" name="sourceCode" label="Sumber data" help="Link github"  validation="required|url" />
-                
-                <VueMultiselect v-model=" port " :options=" portList " :multiple=" false " :searchable="true" @search-change=" findPort " placeholder="Cari port yang tersedia" label="number" track-by="number"/>
-                <br/>
-                <FormKit type="submit" />
-                <pre wrap>{{ status }}</pre>
-            </FormKit>
-        </div>
-    </div>
+    <v-form ref="form" v-model=" isValid " lazy-validation>
+        <v-text-field v-model=" backend.sourceCode " label="Repository link" required
+            :rules=" linkValidation">
+        </v-text-field>
+        <v-textarea v-model=" backend.description " label="Description" required
+            :rules=" [ v => !!v || 'Description is required' ] "></v-textarea>
+
+        <v-checkbox v-model=" checkbox " :rules=" [ v => !!v || 'You must agree to continue!' ] "
+            label="Apakah data sudah benar?" required></v-checkbox>
+
+        <p>{{error}}</p>
+
+        <v-btn color="success" class="mr-4" @click=" validate ">
+            Submit
+        </v-btn>
+    </v-form>
 </template>
 <script>
 import axios from 'axios'
 import { projectService } from '../../constant/endpoint'
 import useAuthStore from '../../stores/auth'
-import VueMultiselect from 'vue-multiselect'
+
+const store = useAuthStore()
 
 export default {
-    components: { VueMultiselect },
     data () {
         return {
-            status: null,
-            store: useAuthStore(),
-            port: null,
+            error: null,
+            isValid: null,
+            backend: {
+                description: null,
+                sourceCode: null,
+                studentId: store.user.studentAccount.id
+            },
+            findPort: null,
             portList: [],
+            checkbox: false,
+            linkValidation: [
+                v => !!v || 'Provide SourceCode',
+                // v => v.match( '^(https?:\\/\\/)?' + // validate protocol
+                //     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
+                //     '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
+                //     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
+                //     '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
+                //     '(\\#[-a-z\\d_]*)?$', 'i' )
+                //     || 'Link is not valid',
+            ]
         }
     },
     methods: {
-        async submit ( backend ) {
+        async validate () {
+            const { valid } = await this.$refs.form.validate()
 
-            backend.studentId = this.store.user.studentAccount.id
-            backend.port = this.port
-            await axios.post( 
-                projectService + "student/backend",
-                backend,
-             )
-                .then( ( response ) => {
-                    this.status = response.message
-                } )
-                .catch( ( response ) => {
-                    this.status = response.message
-                    return
-                } )
-
-            this.$router.push( { name: 'Student Dashboard' } )
+            if ( valid ) this.submit()
+            else return
         },
-        async findPort ( number ) {
-            await axios.get(
-                projectService + 'find-available-port',
-                { params: { number } }
+        async submit () {
+            await axios.post(
+                projectService + "student/backend",
+                this.backend,
             )
-                .then( ( response ) => {
-                    this.portList = response.data
-                    console.log(response.data,this.portList);
+                .catch( ( response ) => {
+                    this.error = response.message
                 } )
+            if ( this.error ) return
+            this.$router.push( { name: 'Student Dashboard' } )
         },
     },
 }
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.css">
-
-</style>

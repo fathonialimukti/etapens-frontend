@@ -33,6 +33,11 @@ const routes = [
             path: 'test',
             component: () => import( '../pages/Test.vue' )
         }, {
+            name: 'Login',
+            path: 'login',
+            meta: { login: true },
+            component: () => import( '../pages/Login.vue' )
+        }, {
             path: 'student',
             meta: { student: true },
             children: [ {
@@ -54,7 +59,7 @@ const routes = [
             }, ]
         }, {
             path: 'lecturer',
-            meta: { lecturers: true },
+            meta: { lecturer: true },
             children: [ {
                 name: 'Lecturer Dashboard',
                 path: '',
@@ -82,15 +87,14 @@ const routes = [
             path: 'list-database',
             component: () => import( '../pages/admin/Database.vue' )
         }, {
+            name: 'List Frontend',
+            path: 'list-frontend',
+            component: () => import( '../pages/admin/Frontend.vue' )
+        }, {
             name: 'List Backend',
             path: 'list-backend',
             component: () => import( '../pages/admin/Backend.vue' )
-        }, {
-            name: 'System Information',
-            path: 'system-information',
-            component: () => import( '../pages/admin/SystemInformation.vue' )
-        }
-        ],
+        } ],
     }
 ]
 

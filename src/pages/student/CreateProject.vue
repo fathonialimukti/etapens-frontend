@@ -1,81 +1,119 @@
-<template lang="">
-    <div class="card bg-slate-200 p-4">
-        <div class="bg-white p-3 rounded-lg max-w-xl w-screen">
-            <FormKit type="form" id="project" submit-label="Register" @submit="submit" :actions="false" #default="{ value }" :config="{ preserveErrors: true }">
-                <FormKit type="textarea" name="title" label="Judul Penelitian" validation="required" />
-                <FormKit type="textarea" name="description" label="Deskripsi Singkat" validation="required" />
-                <FormKit type="textarea" name="abstract" label="Penjelasan Lengkap" validation="required" />
-                <FormKit type="text" name="video" label="Link Video Youtube" validation="required|url" /> 
-                <FormKit type="select" name="type" label="Tipe Aplikasi" validation="required" :options="{Generals: 'Generals', NodeJs: 'Website Node Js', SelfHostedWeb: 'Website Self Hosted'}"/>
-                
-                <FormKit v-if="value.type == 'SelfHostedWeb'" type="text" name="url" label="Url Aplikasi" validation="url"/>  
-                <FormKit v-if="value.type == 'NodeJs'" type="text" name="sourceCode" label="Sumber data" help="Link git. Pastikan repository dapat diakses public" validation="url"/>
-                <p v-if="value.type == 'NodeJs'" class="py-4">Port</p>
-                <VueMultiselect v-if="value.type == 'NodeJs'" v-model=" port " :options=" portList " :multiple=" false " :searchable="true" @search-change=" findPort " placeholder="Cari port yang tersedia" label="number" track-by="number"/>
-                
-                <p class="py-4">Dosen Pembimbing</p>
-                <VueMultiselect v-model=" lecturers " :options="lecturerList" :multiple=" true " :searchable="true" @search-change="findLecturer" placeholder="Cari Nama" label="name" track-by="name"/>
-                
-                <p class="py-4">Teknologi yang digunakan</p>
-                <VueMultiselect v-model=" tech " :options=" techList " :multiple=" true " :searchable="true" @search-change=" findTechList " placeholder="Cari Teknologi yang terdaftar" label="name" track-by="name" />
+<template>
+    <v-form ref="form" v-model=" isValid " lazy-validation>
+        <v-text-field v-model=" project.title " label="Judul Tugas Akhir" :rules=" [ v => !!v || ' is Required' ] "
+            clearable />
 
-                <p class="py-4">Jenis Penelitian</p>
-                <VueMultiselect v-model=" researchFields " :multiple=" true " :options=" researchFieldList " :searchable="true" @search-change=" findResearchField " placeholder="Cari Bidang Penelitian yang terdaftar"  label="name" track-by="name"  />
+        <v-textarea v-model=" project.description " label="Deskripsi atau Abstract"
+            :rules=" [ v => !!v || 'Description is Required' ] " clearable />
 
-                <p class="py-4">Metode yang digunakan</p>
-                <VueMultiselect v-model=" methods " :options=" methodList " :multiple=" true " :searchable="true" @search-change=" findMethod " placeholder="Cari Metode Penelitian yang terdaftar"  label="name" track-by="name"  />
-                <br>
+        <v-autocomplete label="Dosen pembimbing" v-model=" project.lecturers " v-model:search=" search.lecturers "
+            @input=" findLecturer " :items=" list.lecturers " item-title="name"
+            placeholder="Start typing then enter search" prepend-icon="mdi-human-male-board-poll" chips closable-chips
+            return-object multiple hide-no-data hide-selected />
 
-                <FormKit type="file" name="images" label="Gambar Hasil Akhir" validation="required" multiple/>
-                <FormKit type="file" name="documents" label="Dokumen Penunjang" help="Buku TA dan Presentasi TA dalam bentuk pdf" validation="required" multiple accept=".pdf"/>
-                
-                <FormKit type="submit" />
-                <pre wrap>{{ status }}</pre>
-            </FormKit>
-        </div>
-    </div>
+        <v-text-field v-model=" project.video " label="Video demo" :rules=" [ v => !!v || 'Abstract is Required' ] "
+            prepend-icon="mdi-youtube" clearable />
+
+        <v-autocomplete label="Tipe Aplikasi" v-model=" project.type "
+            :items=" [ 'Generals', 'WebStatic', 'SelfHostedWeb', 'NodeJs' ] "
+            :rules=" [ v => !!v || 'App type is Required' ] " prepend-icon="mdi-format-list-bulleted-type" />
+
+        <v-text-field v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' " v-model=" project.sourceCode "
+            label="Source Code" :rules=" [ v => !!v || 'Source Code is Required' ] " prepend-icon="mdi-git" clearable />
+
+        <v-text-field v-if=" project.type == 'SelfHostedWeb' " v-model=" project.url "
+            label="Url Aplikasi" :rules=" [ v => !!v || 'Url is Required' ] " prepend-icon="mdi-web" clearable />
+
+        <v-autocomplete label="Teknologi yang digunakan" v-model=" project.tech " v-model:search=" search.tech "
+            @input=" findTech " :items=" list.tech " item-title="name" :rules=" [ v => !!v || 'Tech is Required' ] "
+            placeholder="Start typing then enter search" prepend-icon="mdi-tools" multiple chips closable-chips
+            return-object hide-no-data hide-selected />
+
+        <v-autocomplete label="Metode yang digunakan" v-model=" project.methods " v-model:search=" search.methods "
+            @input=" findMethods " :items=" list.methods " item-title="name" item-value="name"
+            :rules=" [ v => !!v || 'Method is Required' ] " placeholder="Start typing then enter search"
+            prepend-icon="mdi-tools" multiple chips closable-chips return-object hide-no-data hide-selected />
+
+        <v-autocomplete label="jenis Penelitian" v-model=" project.researchFields "
+            v-model:search=" search.researchFields " @input=" findResearchFields " :items=" list.researchFields "
+            item-title="name" :rules=" [ v => !!v || 'Reseach Fieldl is Required' ] "
+            placeholder="Start typing then enter search" prepend-icon="mdi-focus-field" multiple chips closable-chips
+            return-object hide-no-data hide-selected />
+
+        <v-file-input type="file" v-model=" project.images " chips multiple label="Gambar hasil TA"
+            :rules=" [ v => !!v || 'Images is Required' ] " prepend-icon="mdi-image-check-outline" />
+
+        <v-file-input type="file" v-model=" project.documents " chips multiple label="Dokumen TA"
+            :rules=" [ v => !!v || 'Documents is Required' ] " prepend-icon="mdi-file-document" />
+
+        <v-checkbox v-model=" checkbox " :rules=" [ v => !!v || 'You must agree to continue!' ] "
+            label="Apakah data sudah benar?" />
+
+        <!-- Add loading state -->
+        <p>{{ error }}</p>
+        <p>{{ status }}</p>
+
+        <v-btn color="success" class="mr-4" @click=" validate ">
+            Submit
+        </v-btn>
+    </v-form>
 </template>
+
 <script>
 import { Storage } from 'aws-amplify'
 import axios from 'axios'
 import { projectService } from '../../constant/endpoint'
 import useAuthStore from '../../stores/auth'
-import VueMultiselect from 'vue-multiselect'
 
+const store = useAuthStore()
 export default {
-    components: { VueMultiselect },
     data () {
         return {
+            project: {
+                title: null,
+                studentId: store.user.studentAccount.id,
+                description: null,
+                lecturers: [],
+                video: null,
+                type: null,
+                sourceCode: null,
+                url: null,
+                tech: [],
+                methods: [],
+                researchFields: [],
+                documents: [],
+                images: [],
+            },
+            search: {
+                lecturers: null,
+                tech: null,
+                researchFields: null,
+                methods: null,
+            },
+            list: {
+                lecturers: [],
+                tech: [],
+                researchFields: [],
+                method: [],
+            },
             status: null,
-            store: useAuthStore(),
-            lecturers: null,
-            lecturerList: [],
-            tech: null,
-            researchFields: null,
-            methods: null,
-            techList: [],
-            researchFieldList: [],
-            methodList: [],
-            port: null,
-            portList: [],
+            error: null,
+            checkbox: false
         }
     },
     methods: {
-        async submit ( project ) {
-            console.log( project )
-            // project.student = {}
-            // project.student.connect = { id: this.store.user.studentAccount.id }
-            project.studentId = this.store.user.studentAccount.id
-            console.log( project )
+        async validate () {
+            const { valid } = await this.$refs.form.validate()
 
-            project.tech = this.tech
-            project.researchFields = this.researchFields
-            project.methods = this.methods
-            project.lecturers = this.lecturers
-            project.port = this.port
-
+            if ( valid ) this.submit()
+            else return
+        },
+        async submit () {
+            var project = this.project
             const documents = project.documents
             const images = project.images
+
+            project.video = project.video.split( '/' ).pop()
 
             project.documents = []
             project.images = []
@@ -93,53 +131,50 @@ export default {
                     this.status = response.message
                     project = response.data
                 } )
-                .catch( () => {
-                    this.status = "Error"
+                .catch( ( error ) => {
+                    this.status = "Error:" + error
                 } )
 
-            if ( this.status == "Error" ) return
+            if ( this.error ) return
+
             // upload
-            for ( const index of images ) {
-                const image = index.file
-                await Storage.put( `${ this.store.user.username }/images/${ image.name }`, image, {
+            for ( const image of images ) {
+                await Storage.put( `${ store.user.username }/images/${ image.name }`, image, {
                     acl: "public-read",
                     contentType: image.type,
                     progressCallback: ( progress ) => {
                         this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
                     },
                     errorCallback: ( error ) => {
-                        console.error( 'Unexpected error while uploading', error )
-                        return false
+                        this.error = 'Unexpected error while uploading' + error
                     },
                     completeCallback: ( event ) => {
                         this.status = `Successfully uploaded ${ event.key }`
                     },
                 } )
-                project.images.push( baseUrl + `${ this.store.user.username }/images/${ image.name.replace( / /g, "+" ) }` )
+                project.images.push( baseUrl + `${ store.user.username }/images/${ image.name.replace( / /g, "+" ) }` )
             };
 
-            if ( this.status == "Error" ) return
+            if ( this.error ) return
 
-            for ( const index of documents ) {
-                const document = index.file
-                await Storage.put( `${ this.store.user.username }/documents/${ document.name }`, document, {
+            for ( const document of documents ) {
+                await Storage.put( `${ store.user.username }/documents/${ document.name }`, document, {
                     acl: "public-read",
                     contentType: document.type,
                     progressCallback: ( progress ) => {
                         this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
                     },
                     errorCallback: ( error ) => {
-                        this.status = 'Unexpected error while uploading' + error
-                        return false
+                        this.error = 'Unexpected error while uploading' + error
                     },
                     completeCallback: ( event ) => {
                         this.status = `Successfully uploaded ${ event.key }`
                     },
                 } )
-                project.documents.push( { "name": document.name, "url": baseUrl + `${ this.store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
+                project.documents.push( { "name": document.name, "url": baseUrl + `${ store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
             };
 
-            if ( this.status == "Error" ) return
+            if ( this.error ) return
 
             // update project
             await axios( {
@@ -155,74 +190,64 @@ export default {
                     this.status = "Error"
                 } )
 
-            if ( this.status == "Error" ) return
+            if ( this.error ) return
 
             this.$router.push( { name: 'Student Dashboard' } )
         },
 
 
-        async findTechList ( search ) {
+        async findLecturer () {
+            const name = this.search.lecturers
+            await axios.get(
+                projectService + 'find-lecturer',
+                { params: { name } }
+            )
+                .then( ( response ) => {
+                    this.list.lecturers = response.data
+                } )
+                .catch( ( response ) => {
+                    this.list.lecturers[ 0 ] = response.error
+                } )
+        },
+        async findTech () {
+            const search = this.search.tech
             await axios.get(
                 projectService + 'find-tech-list',
                 { params: { name: search } }
             )
                 .then( ( response ) => {
-                    this.techList = response.data
+                    this.list.tech = response.data
                 } )
                 .catch( ( response ) => {
-                    this.techList[ 0 ] = response.error
+                    this.list.tech[ 0 ] = response.error
                 } )
         },
-        async findResearchField ( search ) {
+        async findResearchFields () {
+            const search = this.search.researchFields
             await axios.get(
                 projectService + 'find-research-field',
                 { params: { name: search } }
             )
                 .then( ( response ) => {
-                    this.researchFieldList = response.data
+                    this.list.researchFields = response.data
                 } )
                 .catch( ( response ) => {
-                    this.researchFieldList[ 0 ] = response.error
+                    this.list.researchFields[ 0 ] = response.error
                 } )
         },
-        async findMethod ( search ) {
+        async findMethods () {
+            const search = this.search.methods
             await axios.get(
                 projectService + 'find-research-method',
                 { params: { name: search } }
             )
                 .then( ( response ) => {
-                    this.methodList = response.data
+                    this.list.methods = response.data
                 } )
                 .catch( ( response ) => {
-                    this.methodList[ 0 ] = response.error
-                } )
-        },
-        async findLecturer ( lecturerName ) {
-            await axios.get(
-                projectService + 'find-lecturer',
-                { params: { name: lecturerName } }
-            )
-                .then( ( response ) => {
-                    this.lecturerList = response.data
-                } )
-                .catch( ( response ) => {
-                    this.lecturerList[ 0 ] = response.error
-                } )
-        },
-        async findPort ( number ) {
-            await axios.get(
-                projectService + 'find-available-port',
-                { params: { number } }
-            )
-                .then( ( response ) => {
-                    this.portList = response.data
-                    console.log( response.data, this.portList )
+                    this.list.methods[ 0 ] = response.error
                 } )
         },
     },
 }
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.css">
-
-</style>

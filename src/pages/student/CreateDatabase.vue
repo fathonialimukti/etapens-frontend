@@ -1,77 +1,77 @@
-<template lang="">
-    <div class="card bg-slate-200 p-4">
-        <div class="bg-white p-3 rounded-lg max-w-xl w-screen">
-            <FormKit type="form" id="project" submit-label="Register" @submit="submit" :actions="false" #default="{ value }" :config="{ preserveErrors: true }">
-                <h1>Request Database!</h1>
-                <br />
-                
-                <FormKit type="select" name="type" label="Tipe Database" validation="required" :options="{mysql: 'MySQL', postgres: 'PostgreSQL'}"/>
-                <FormKit type="text" name="name" label="Nama Database" validation="required" />
-                <FormKit type="text" name="username" label="username" validation="required" />
-                <div class="double">
-                    <FormKit
-                        type="password"
-                        name="password"
-                        label="Password"
-                        validation="required|length:6|matches:/[^a-zA-Z]/"
-                        :validation-messages="{
-                        matches: 'Please include at least one symbol',
-                        }"
-                        placeholder="Your password"
-                        help="Choose a password"
-                    />
-                    <FormKit
-                        type="password"
-                        name="password_confirm"
-                        label="Confirm password"
-                        placeholder="Confirm password"
-                        validation="required|confirm"
-                        help="Confirm your password"
-                    />
-                </div>
-                <FormKit type="textarea" name="description" label="Deskripsi Database" validation="required" />
-                <FormKit type="submit" />
-                <pre wrap>{{ status }}</pre>
-            </FormKit>
-        </div>
-    </div>
+<template>
+    <v-form ref="form" v-model=" isValid " lazy-validation>
+        <v-text-field v-model=" database.name " label="Database Name" required
+            :rules=" [ v => !!v || 'Name is required',v => (v || '').indexOf(' ') < 0 || 'No spaces are allowed' ]">
+        </v-text-field>
+        <v-text-field v-model=" database.username " label="Database user name" required
+            :rules=" [ v => !!v || 'Name is required',v => (v || '').indexOf(' ') < 0 || 'No spaces are allowed' ] ">
+        </v-text-field>
+        <v-text-field v-model=" database.password " label="Database user password" required
+            :rules=" [ v => v.match( /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/ ) || 'a password between 8 to 15 characters which contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special' ] ">
+        </v-text-field>
+        <v-textarea v-model=" database.description " label="Description" required
+            :rules=" [ v => !!v || 'Description is required' ] "></v-textarea>
+
+        <v-select v-model=" database.type " :items=" dbList " :rules=" [ v => !!v || 'Database type is required' ] "
+            label="Database type" required></v-select>
+
+        <v-checkbox v-model=" checkbox " :rules=" [ v => !!v || 'You must agree to continue!' ] "
+            label="Apakah data sudah benar?" required></v-checkbox>
+
+        <v-btn color="success" class="mr-4" @click=" validate ">
+            Submit
+        </v-btn>
+    </v-form>
 </template>
+
 <script>
 import axios from 'axios'
 import { projectService } from '../../constant/endpoint'
 import useAuthStore from '../../stores/auth'
-import VueMultiselect from 'vue-multiselect'
+
+const store = useAuthStore()
 
 export default {
-    components: { VueMultiselect },
     data () {
         return {
-            status: null,
-            store: useAuthStore(),
+            error: null,
+            isValid: null,
+            database: {
+                type: null,
+                name: null,
+                username: null,
+                password: null,
+                description: null,
+                studentId: store.user.studentAccount.id
+            },
+            dbList: [
+                'postgresql',
+                'mysql'
+            ],
+            checkbox: false,
         }
     },
     methods: {
-        async submit ( database ) {
-            database.studentId = this.store.user.studentAccount.id
-            delete database.password_confirm
+        async validate () {
+            const { valid } = await this.$refs.form.validate()
+
+            if ( valid ) this.submit()
+            else return
+        },
+
+        async submit () {
+            console.log( this.database )
             await axios.post(
                 projectService + "student/database",
-                database,
+                this.database,
             )
-                .then( ( response ) => {
-                    this.status = response.message
-                } )
                 .catch( ( response ) => {
-                    this.status = response.message
-                    return
+                    this.error = response.message
                 } )
 
+            if ( this.error ) return
             this.$router.push( { name: 'Student Dashboard' } )
         },
     }
 }
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.css">
-
-</style>

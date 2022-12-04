@@ -8,7 +8,7 @@
 
         <div class="bg-gray-50 py-5 grid grid-cols-2 gap-4 px-6">
             <p class="text-lg font-medium">Bio</p>
-            <p class=" text-gray-900 mt-0 col-span-2">{{ student.bio }}</p>
+            <p class=" text-gray-900 mt-0 col-span-2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit quae vitae ex voluptatem sed optio eius veniam perferendis consequuntur! Ullam accusamus, natus officiis blanditiis deserunt ea laboriosam temporibus harum modi quod quia ad? Ducimus?</p>
         </div>
 
         <div class="bg-gray-50 py-5 grid grid-cols-2 gap-4 px-6">

@@ -1,8 +1,9 @@
 <template>
     <!-- <v-text-field v-model=" title " label="Pencarian Judul" class="-mb-5" density="compact" @input=" submit "></v-text-field> -->
 
-    <v-text-field v-model=" title " @input="submit" variant="outlined" label="Cari Judul" prepend-inner-icon="mdi-magnify"
-      append-inner-icon="mdi-nut" single-line hide-details @click:append-inner=" dialog = !dialog "></v-text-field>
+    <v-text-field v-model=" title " v-on:keyup.enter="submit" variant="outlined" label="Cari Judul" prepend-inner-icon="mdi-magnify"
+      append-inner-icon="mdi-nut" single-line hide-details @click:append-inner=" dialog = !dialog ">
+    </v-text-field>
 
     <v-dialog v-model=" dialog " persistent>
       <v-card>
@@ -20,13 +21,13 @@
               return-object multiple hide-no-data hide-selected>
             </v-autocomplete>
 
-            <v-autocomplete label="Jenis Penelitian" v-model=" researchFields " v-model:search=" searchResearchFields "
+            <v-autocomplete label="Jenis Penelitian" v-model=" researchField " v-model:search=" searchResearchField "
               @input=" findResearchField " :items=" researchFieldList " item-title="name"
               placeholder="Start typing then enter search" prepend-icon="mdi-tools" chips closable-chips return-object
               multiple hide-no-data hide-selected>
             </v-autocomplete>
 
-            <v-autocomplete label="Metode yang digunakan" v-model=" methods " v-model:search=" searchMethods "
+            <v-autocomplete label="Metode yang digunakan" v-model=" method " v-model:search=" searchMethod "
               @input=" findMethod " :items=" methodList " item-title="name"
               placeholder="Start typing then enter search" prepend-icon="mdi-account-question" chips closable-chips
               return-object multiple hide-no-data hide-selected>
@@ -57,11 +58,11 @@ export default {
       dialog: false,
       title: undefined,
       tech: [],
-      researchFields: [],
-      methods: [],
+      researchField: [],
+      method: [],
       searchTech: null,
-      searchResearchFields: null,
-      searchMethods: null,
+      searchResearchField: null,
+      searchMethod: null,
       techList: [],
       researchFieldList: [],
       methodList: [],
@@ -78,19 +79,19 @@ export default {
       for ( const key of this.tech ) {
         tech.push( key.name )
       }
-      const researchFields = []
-      for ( const key of this.researchFields ) {
-        researchFields.push( key.name )
+      const researchField = []
+      for ( const key of this.researchField ) {
+        researchField.push( key.name )
       }
-      const methods = []
-      for ( const key of this.methods ) {
-        methods.push( key.name )
+      const method = []
+      for ( const key of this.method ) {
+        method.push( key.name )
       }
       this.$emit( 'submit', {
         title: this.title,
         tech: tech,
-        researchFields: researchFields,
-        methods: methods
+        researchField: researchField,
+        method: method
       } )
     },
 
@@ -101,7 +102,7 @@ export default {
         { params: { name: this.searchTech } }
       )
         .then( ( response ) => {
-          this.techList = response.data
+          this.techList = response.data.data
         } )
         .catch( ( response ) => {
           this.techList[ 0 ] = response.error
@@ -110,10 +111,10 @@ export default {
     async findResearchField () {
       await axios.get(
         projectService + 'find-research-field',
-        { params: { name: this.searchResearchFields } }
+        { params: { name: this.searchResearchField } }
       )
         .then( ( response ) => {
-          this.researchFieldList = response.data
+          this.researchFieldList = response.data.data
         } )
         .catch( ( response ) => {
           this.researchFieldList[ 0 ] = response.error
@@ -122,10 +123,10 @@ export default {
     async findMethod () {
       await axios.get(
         projectService + 'find-research-method',
-        { params: { name: this.searchMethods } }
+        { params: { name: this.searchMethod } }
       )
         .then( ( response ) => {
-          this.methodList = response.data
+          this.methodList = response.data.data
         } )
         .catch( ( response ) => {
           this.methodList[ 0 ] = response.error

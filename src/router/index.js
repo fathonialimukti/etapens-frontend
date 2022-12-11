@@ -94,6 +94,18 @@ const routes = [
             name: 'List Backend',
             path: 'list-backend',
             component: () => import( '../pages/admin/Backend.vue' )
+        }, {
+            name: 'List Research Field',
+            path: 'list-research-field',
+            component: () => import( '../pages/admin/ResearchField.vue' )
+        }, {
+            name: 'List Tech',
+            path: 'list-tech',
+            component: () => import( '../pages/admin/TechList.vue' )
+        }, {
+            name: 'List Research Method',
+            path: 'list-research-method',
+            component: () => import( '../pages/admin/ResearchMethod.vue' )
         } ],
     }
 ]

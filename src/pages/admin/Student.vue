@@ -4,7 +4,7 @@
       prepend-inner-icon="mdi-format-list-numbered" />
     <v-select v-model=" isActive " label="Status" class="md:col-span-2" :items=" [ 'All', 'Active', 'Inactive' ] "
       prepend-inner-icon="mdi-list-status" />
-    <v-text-field v-model=" name " label="Name" class="md:col-span-5" @change=" getData "
+    <v-text-field v-model=" name " label="Name" class="md:col-span-5" @input=" getData "
       prepend-inner-icon="mdi-book-search-outline" />
   </div>
   <v-table fixed-header>
@@ -22,13 +22,10 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="  student  in data" :key=" student.id ">
+      <tr v-for=" student  in data" :key=" student.id ">
         <td>
-          <!-- <v-avatar color="grey" rounded="0" :image=" student.image " /> -->
-          <router-link :to=" { title: 'student-profile', params: { title: student.name } } "
-            class="flex flex-wrap font-bold " target="_blank">
-            {{ student.name }}
-          </router-link>
+          <v-avatar rounded="0" :image=" student.image " />
+          {{ student.name }}
         </td>
         <td>{{ student.name }}</td>
         <td>
@@ -42,6 +39,18 @@
       </tr>
     </tbody>
   </v-table>
+
+  <div class="text-center">
+    <v-container>
+      <v-row justify="center">
+        <v-col cols="8">
+          <v-container class="max-width">
+            <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click=" getData "></v-pagination>
+          </v-container>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -89,7 +98,15 @@ export default {
           console.log( error )
         } )
     }
-  }
+  },
+  watch: {
+    isActive () {
+      this.getData()
+    },
+    itemPerPage () {
+      this.getData()
+    }
+  },
 }
 </script>
 

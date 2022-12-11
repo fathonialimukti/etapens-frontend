@@ -4,7 +4,7 @@
       prepend-inner-icon="mdi-format-list-numbered" />
     <v-select v-model=" isActive " label="Status" class="md:col-span-2" :items=" [ 'All', 'Active', 'Inactive' ] "
       prepend-inner-icon="mdi-list-status" />
-    <v-text-field v-model=" name " label="Name" class="md:col-span-5" @change=" getData "
+    <v-text-field v-model=" name " label="Name" class="md:col-span-5" @input=" getData "
       prepend-inner-icon="mdi-book-search-outline" />
   </div>
   <v-table fixed-header>
@@ -24,20 +24,33 @@
     <tbody>
       <tr v-for="  lecturer  in data" :key=" lecturer.id ">
         <td>
-            {{ lecturer.name }}
+          <v-avatar rounded="0" :image=" lecturer.image " />
+          {{ lecturer.name }}
         </td>
         <td>{{ lecturer.nip }}</td>
         <td>
           <v-chip v-if=" lecturer.isActive " color="green" text-color="white">
             Active
           </v-chip>
-          <v-btn v-else @click=" activate( lecturer.id ) " color="error" size="small" rounded="pill">
+          <v-btn v-else @click=" activate( lecturer.id ) " color="error" size="small" rounded="pill" :loading="loading" :disabled="loading">
             Activate
           </v-btn>
         </td>
       </tr>
     </tbody>
   </v-table>
+
+  <div class="text-center">
+    <v-container>
+      <v-row justify="center">
+        <v-col cols="8">
+          <v-container class="max-width">
+            <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click=" getData "></v-pagination>
+          </v-container>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -82,7 +95,15 @@ export default {
           console.log( error )
         } )
     }
-  }
+  },
+  watch: {
+    isActive () {
+      this.getData()
+    },
+    itemPerPage () {
+      this.getData()
+    }
+  },
 }
 </script>
 

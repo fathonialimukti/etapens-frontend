@@ -21,16 +21,13 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import useAuthStore from "../stores/auth"
 import Avatar from '../components/Avatar.vue'
-
-const theme = ref( 'dark' )
 
 export default {
   data () {
     return {
-      theme,
+      theme: 'light',
       store: useAuthStore(),
     }
   },

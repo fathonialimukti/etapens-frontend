@@ -18,7 +18,7 @@
         <v-checkbox v-model=" checkbox " :rules=" [ v => !!v || 'You must agree to continue!' ] "
             label="Apakah data sudah benar?" required></v-checkbox>
 
-        <v-btn color="success" class="mr-4" @click=" validate ">
+        <v-btn color="success" class="mr-4" @click=" validate " :loading="loading" :disabled="loading">
             Submit
         </v-btn>
     </v-form>
@@ -49,6 +49,7 @@ export default {
                 'mysql'
             ],
             checkbox: false,
+            loading: false,
         }
     },
     methods: {
@@ -60,7 +61,7 @@ export default {
         },
 
         async submit () {
-            console.log( this.database )
+            this.loading = true
             await axios.post(
                 projectService + "student/database",
                 this.database,
@@ -69,7 +70,10 @@ export default {
                     this.error = response.message
                 } )
 
-            if ( this.error ) return
+            if ( this.error ) {
+                this.loading = false
+                return
+            }
             this.$router.push( { name: 'Student Dashboard' } )
         },
     }

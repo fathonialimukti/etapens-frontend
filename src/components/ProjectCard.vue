@@ -6,11 +6,20 @@
       {{project.title}}
     </v-card-text>
 
-    <v-card-text class="pt-0">
-      <v-chip v-for=" tech in project.tech" color="primary" size="x-small" class="m-0.5">
+    <v-card-subtitle class="py-0">
+      {{project.student.name}}
+    </v-card-subtitle>
+
+    <v-card-subtitle class="py-0">
+      {{project.student.nrp}}
+    </v-card-subtitle>
+
+    <v-card-text>
+      <v-chip v-for=" tech in project.tech" color="blue" size="x-small" class="mr-0.5 mb-0.5">
         {{tech.name}}
       </v-chip>
     </v-card-text>
+
 
   </v-card>
 </template>

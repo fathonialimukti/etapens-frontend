@@ -59,6 +59,9 @@ export default {
         { name: 'List Database', icon: 'mdi-database' },
         { name: 'List Student', icon: 'mdi-account-group' },
         { name: 'List Lecturer', icon: 'mdi-human-male-board-poll' },
+        { name: 'List Tech', icon: 'mdi-clipboard-list' },
+        { name: 'List Research Field', icon: 'mdi-clipboard-list-outline' },
+        { name: 'List Research Method', icon: 'mdi-clipboard-minus' },
       ]
     }
   },

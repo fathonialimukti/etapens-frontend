@@ -13,7 +13,7 @@
         <v-card>
             <v-card-text>
                 <div class="mx-auto text-center">
-                    <v-avatar size="large">
+                    <v-avatar size="large" rounded="0">
                         <v-img v-if=" store.user.studentAccount?.image || store.user.lecturerAccount?.image "
                             :src=" store.user.studentAccount?.image || store.user.lecturerAccount?.image "
                             :alt=" store.user.username "></v-img>

@@ -4,11 +4,11 @@
       prepend-inner-icon="mdi-format-list-numbered" />
     <v-select v-model=" name " label="Status" class="md:col-span-2" :items=" [ 'All', 'Active', 'Inactive' ] "
       prepend-inner-icon="mdi-list-status" />
-    <v-text-field v-model=" title " label="Title" class="md:col-span-5" @change=" getData "
+    <v-text-field v-model=" title " label="Title" class="md:col-span-5" @input=" getData "
       prepend-inner-icon="mdi-book-search-outline" />
   </div>
-  
-  <v-progress-linear v-if="loading" indeterminate color="green"></v-progress-linear>
+
+  <v-progress-linear v-if=" loading " indeterminate color="green"></v-progress-linear>
   <v-table fixed-header>
     <thead>
       <tr>
@@ -30,11 +30,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="database in data" :key=" database.id ">
+      <tr v-for=" database  in data" :key=" database.id ">
         <td>{{ database.student.name }}</td>
         <td> {{ database.name }} </td>
         <td>
-          <a v-if=" database.sourceCode " :href=" database.sourceCode " target="_blank" >
+          <a v-if=" database.sourceCode " :href=" database.sourceCode " target="_blank">
             <v-btn color="warning">
               {{ database.type }}
             </v-btn>
@@ -46,7 +46,7 @@
           <p>{{ database.password }}</p>
         </td>
         <td>
-          <v-btn v-if=" !database.isActive " @click=" deploy( database ) " color="error" size="small" rounded="pill">
+          <v-btn v-if=" !database.isActive " @click=" deploy( database ) " color="error" size="small" rounded="pill" :loading="loading" :disabled="loading">
             Deploy
           </v-btn>
           <v-chip v-else color="green" text-color="white">
@@ -56,6 +56,18 @@
       </tr>
     </tbody>
   </v-table>
+
+  <div class="text-center">
+    <v-container>
+      <v-row justify="center">
+        <v-col cols="8">
+          <v-container class="max-width">
+            <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click=" getData "  :loading="loading" :disabled="loading"></v-pagination>
+          </v-container>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>

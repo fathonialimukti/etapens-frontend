@@ -1,22 +1,26 @@
 <template>
     <v-form ref="form" v-model=" isValid " lazy-validation>
         <v-text-field v-model=" project.title " label="Judul Tugas Akhir" :rules=" [ v => !!v || ' is Required' ] "
-            clearable />
+            prepend-icon="mdi-format-title" clearable />
 
         <v-textarea v-model=" project.description " label="Deskripsi atau Abstract"
-            :rules=" [ v => !!v || 'Description is Required' ] " clearable />
+             prepend-icon="mdi-sticker-text-outline" :rules=" [ v => !!v || 'Description is Required' ] " clearable />
 
         <v-autocomplete label="Dosen pembimbing" v-model=" project.lecturers " v-model:search=" search.lecturers "
-            @input=" findLecturer " :items=" list.lecturers " item-title="name"
+            @input=" findLecturer " :items=" list.lecturers " item-title="name" :rules=" [ v => !!v || 'Lecturers list is Required', v => v.length < 4 || 'This maybe a mistake' ] "
             placeholder="Start typing then enter search" prepend-icon="mdi-human-male-board-poll" chips closable-chips
             return-object multiple hide-no-data hide-selected />
 
-        <v-text-field v-model=" project.video " label="Video demo" :rules=" [ v => !!v || 'Abstract is Required' ] "
+        <v-text-field v-model=" project.video " label="Video demo" :rules=" [ v => !!v || 'Video is Required' ] "
             prepend-icon="mdi-youtube" clearable />
 
         <v-autocomplete label="Tipe Aplikasi" v-model=" project.type "
             :items=" [ 'Generals', 'WebStatic', 'SelfHostedWeb', 'NodeJs' ] "
             :rules=" [ v => !!v || 'App type is Required' ] " prepend-icon="mdi-format-list-bulleted-type" />
+
+        <v-autocomplete v-if=" project.type == 'NodeJs' " label="Versi Node js" v-model=" project.runtimeVersion "
+            :items=" [ 16, 18 ] " :rules=" [ v => !!v || 'Node version is Required' ] "
+            prepend-icon="mdi-nodejs" />
 
         <v-text-field v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' " v-model=" project.sourceCode "
             label="Source Code" :rules=" [ v => !!v || 'Source Code is Required' ] " prepend-icon="mdi-git" clearable />
@@ -29,13 +33,13 @@
             placeholder="Start typing then enter search" prepend-icon="mdi-tools" multiple chips closable-chips
             return-object hide-no-data hide-selected />
 
-        <v-autocomplete label="Metode yang digunakan" v-model=" project.methods " v-model:search=" search.methods "
-            @input=" findMethods " :items=" list.methods " item-title="name" item-value="name"
+        <v-autocomplete label="Metode yang digunakan" v-model=" project.method " v-model:search=" search.method "
+            @input=" findMethods " :items=" list.method " item-title="name" item-value="name"
             :rules=" [ v => !!v || 'Method is Required' ] " placeholder="Start typing then enter search"
             prepend-icon="mdi-tools" multiple chips closable-chips return-object hide-no-data hide-selected />
 
-        <v-autocomplete label="jenis Penelitian" v-model=" project.researchFields "
-            v-model:search=" search.researchFields " @input=" findResearchFields " :items=" list.researchFields "
+        <v-autocomplete label="jenis Penelitian" v-model=" project.researchField "
+            v-model:search=" search.researchField " @input=" findResearchFields " :items=" list.researchField "
             item-title="name" :rules=" [ v => !!v || 'Reseach Fieldl is Required' ] "
             placeholder="Start typing then enter search" prepend-icon="mdi-focus-field" multiple chips closable-chips
             return-object hide-no-data hide-selected />
@@ -53,7 +57,7 @@
         <p>{{ error }}</p>
         <p>{{ status }}</p>
 
-        <v-btn color="success" class="mr-4" @click=" validate ">
+        <v-btn color="success" class="mr-4" @click=" validate " :loading="loading" :disabled="loading">
             Submit
         </v-btn>
     </v-form>
@@ -76,28 +80,30 @@ export default {
                 lecturers: [],
                 video: null,
                 type: null,
+                runtimeVersion: null,
                 sourceCode: null,
                 url: null,
                 tech: [],
-                methods: [],
-                researchFields: [],
+                method: [],
+                researchField: [],
                 documents: [],
                 images: [],
             },
             search: {
                 lecturers: null,
                 tech: null,
-                researchFields: null,
-                methods: null,
+                researchField: null,
+                method: null,
             },
             list: {
                 lecturers: [],
                 tech: [],
-                researchFields: [],
+                researchField: [],
                 method: [],
             },
             status: null,
             error: null,
+            loading: false,
             checkbox: false
         }
     },
@@ -109,11 +115,14 @@ export default {
             else return
         },
         async submit () {
+            this.loading = true 
+            this.error = false
             var project = this.project
             const documents = project.documents
             const images = project.images
 
-            project.video = project.video.split( '/' ).pop()
+            if ( !!project.video.includes( '=' ) ) project.video = project.video.split( '=' ).pop()
+            else project.video = project.video.split( '/' ).pop()
 
             project.documents = []
             project.images = []
@@ -132,10 +141,13 @@ export default {
                     project = response.data
                 } )
                 .catch( ( error ) => {
-                    this.status = "Error:" + error
+                    this.error = "Error:" + error
                 } )
 
-            if ( this.error ) return
+            if ( this.error ) {
+                this.loading = false
+                return
+            }
 
             // upload
             for ( const image of images ) {
@@ -155,7 +167,10 @@ export default {
                 project.images.push( baseUrl + `${ store.user.username }/images/${ image.name.replace( / /g, "+" ) }` )
             };
 
-            if ( this.error ) return
+            if ( this.error ) {
+                this.loading = false
+                return
+            }
 
             for ( const document of documents ) {
                 await Storage.put( `${ store.user.username }/documents/${ document.name }`, document, {
@@ -174,7 +189,10 @@ export default {
                 project.documents.push( { "name": document.name, "url": baseUrl + `${ store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
             };
 
-            if ( this.error ) return
+            if ( this.error ) {
+                this.loading = false
+                return
+            }
 
             // update project
             await axios( {
@@ -186,11 +204,14 @@ export default {
                 .then( ( response ) => {
                     this.status = response.message
                 } )
-                .catch( () => {
-                    this.status = "Error"
+                .catch( (error) => {
+                    this.error = error
                 } )
 
-            if ( this.error ) return
+            if ( this.error ) {
+                this.loading = false
+                return
+            }
 
             this.$router.push( { name: 'Student Dashboard' } )
         },
@@ -216,38 +237,44 @@ export default {
                 { params: { name: search } }
             )
                 .then( ( response ) => {
-                    this.list.tech = response.data
+                    this.list.tech = response.data.data
                 } )
                 .catch( ( response ) => {
                     this.list.tech[ 0 ] = response.error
                 } )
         },
         async findResearchFields () {
-            const search = this.search.researchFields
+            const search = this.search.researchField
             await axios.get(
                 projectService + 'find-research-field',
                 { params: { name: search } }
             )
                 .then( ( response ) => {
-                    this.list.researchFields = response.data
+                    this.list.researchField = response.data.data
                 } )
                 .catch( ( response ) => {
-                    this.list.researchFields[ 0 ] = response.error
+                    this.list.researchField[ 0 ] = response.error
                 } )
         },
         async findMethods () {
-            const search = this.search.methods
+            const search = this.search.method
             await axios.get(
                 projectService + 'find-research-method',
                 { params: { name: search } }
             )
                 .then( ( response ) => {
-                    this.list.methods = response.data
+                    this.list.method = response.data.data
                 } )
                 .catch( ( response ) => {
-                    this.list.methods[ 0 ] = response.error
+                    this.list.method[ 0 ] = response.error
                 } )
         },
     },
+    mounted() {
+        this.findLecturer()
+        this.findMethods()
+        this.findResearchFields()
+        this.findTech()
+    }
 }
 </script>

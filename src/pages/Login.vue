@@ -1,10 +1,6 @@
 <template>
     <authenticator>
     </authenticator>
-    Login Berhasil.
-    <v-btn @click=" $router.push( { name: 'Home' } ) ">
-        Pulang
-    </v-btn>
 </template>
 
 <script>

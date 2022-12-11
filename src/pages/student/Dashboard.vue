@@ -29,22 +29,107 @@
   </v-toolbar>
 
   <v-expansion-panels variant="popout" class="my-4">
-    
+
     <v-expansion-panel v-if=" user.project " title="Project" color="secondary">
       <v-expansion-panel-text>
-        {{ user.project }}
+        <v-card-title> Judul Tugas Akhir </v-card-title>
+        <v-card-text>{{ user.project.title }}</v-card-text>
+
+        <v-card-title> Deskripsi </v-card-title>
+        <v-card-text>{{ user.project.description }}</v-card-text>
+
+        <v-card-title> Tipe Aplikasi </v-card-title>
+        <v-card-text>{{ user.project.type }}</v-card-text>
+
+        <v-card-title> Dosen Pembimbing </v-card-title>
+        <v-card-text>
+          <v-list lines="one">
+            <v-list-item @click="" v-for="lecturer in user.project.lecturers" :key="lecturer.id" :title="lecturer.name" :subtitle="lecturer.nip" :prepend-avatar="lecturer.image"></v-list-item>
+          </v-list>
+        </v-card-text>
+
+        <v-card-title> Repository </v-card-title>
+        <v-card-text>{{ user.project.sourceCode }}</v-card-text>
+
+        <v-card-title> Url </v-card-title>
+        <v-card-text>{{ user.project.url }}</v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn v-if=" user.project.isActive " color="success" variant="elevated">
+            Active
+          </v-btn>
+          <v-btn v-else color="error" variant="elevated">
+            Inactive
+          </v-btn>
+          <v-btn color="blue" variant="elevated">
+            Edit
+          </v-btn>
+          <v-btn color="warning" variant="elevated">
+            Update
+          </v-btn>
+        </v-card-actions>
       </v-expansion-panel-text>
     </v-expansion-panel>
 
     <v-expansion-panel v-if=" user.backend " title="Backend" color="secondary">
       <v-expansion-panel-text>
-        {{ user.backend }}
+        <v-card-title> Deskripsi </v-card-title>
+        <v-card-text>{{ user.backend.description }}</v-card-text>
+
+        <v-card-title> Repository </v-card-title>
+        <v-card-text>{{ user.backend.sourceCode }}</v-card-text>
+
+        <v-card-title> Url </v-card-title>
+        <v-card-text>{{ user.backend.url }}</v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn v-if=" user.backend.isActive " color="success" variant="elevated">
+            Active
+          </v-btn>
+          <v-btn v-else color="error" variant="elevated">
+            Inactive
+          </v-btn>
+          <v-btn color="warning" variant="elevated">
+            Update
+          </v-btn>
+        </v-card-actions>
       </v-expansion-panel-text>
     </v-expansion-panel>
 
     <v-expansion-panel v-if=" user.database " title="Database" color="secondary">
       <v-expansion-panel-text>
-        {{ user.database }}
+        <v-card-title> Nama Database </v-card-title>
+        <v-card-text>{{ user.database.name }}</v-card-text>
+
+        <v-card-title> Deskripsi </v-card-title>
+        <v-card-text>{{ user.database.description }}</v-card-text>
+
+        <v-card-title> Tipe Database </v-card-title>
+        <v-card-text>{{ user.database.type }}</v-card-text>
+
+        <v-card-title> Username </v-card-title>
+        <v-card-text>{{ user.database.username }}</v-card-text>
+
+        <v-card-title> Password </v-card-title>
+        <v-card-text>{{ user.database.password }}</v-card-text>
+
+        <v-card-title> Url </v-card-title>
+        <v-card-text>{{ user.database.url }}</v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn v-if=" user.database.isActive " color="success" variant="elevated">
+            Active
+          </v-btn>
+          <v-btn v-else color="error" variant="elevated">
+            Inactive
+          </v-btn>
+          <v-btn color="warning" variant="elevated">
+            Update
+          </v-btn>
+        </v-card-actions>
       </v-expansion-panel-text>
     </v-expansion-panel>
 

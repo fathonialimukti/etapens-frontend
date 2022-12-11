@@ -39,8 +39,8 @@ export default {
       if ( searchQuery ) {
         if ( searchQuery.title ) query.title = searchQuery.title
         if ( searchQuery.tech.length != 0 ) query.tech = searchQuery.tech
-        if ( searchQuery.researchFields != 0 ) query.researchFields = searchQuery.researchFields
-        if ( searchQuery.methods.length != 0 ) query.methods = this.methods
+        if ( searchQuery.researchField != 0 ) query.researchField = searchQuery.researchField
+        if ( searchQuery.method.length != 0 ) query.method = this.method
       }
 
       axios

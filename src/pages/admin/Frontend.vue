@@ -4,10 +4,10 @@
             prepend-inner-icon="mdi-format-list-numbered" />
         <v-select v-model=" isActive " label="Status" class="md:col-span-2" :items=" [ 'All', 'Active', 'Inactive' ] "
             prepend-inner-icon="mdi-list-status" />
-        <v-text-field v-model=" title " label="Title" class="md:col-span-5" @change=" getData "
+        <v-text-field v-model=" title " label="Title" class="md:col-span-5" @input=" getData "
             prepend-inner-icon="mdi-book-search-outline" />
     </div>
-    <v-progress-linear v-if="loading" indeterminate color="green"></v-progress-linear>
+    <v-progress-linear v-if=" loading " indeterminate color="green"></v-progress-linear>
     <v-table fixed-header>
         <thead>
             <tr>
@@ -26,9 +26,9 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="project in data" :key=" project.id ">
+            <tr v-for=" project  in data" :key=" project.id ">
                 <td>
-                    <router-link :to=" { title: 'Project', params: { title: project.title } } "
+                    <router-link :to=" { name: 'Project', params: { title: project.title } } "
                         class="flex flex-wrap font-bold " target="_blank">
                         {{ project.title }}
                     </router-link>
@@ -43,20 +43,34 @@
                     <p v-else>{{ project.type }}</p>
                 </td>
                 <td>
-                    <v-btn v-if=" project.type == 'NodeJs' && !project.isActive " @click=" deploy( project ) "
-                        color="error" size="small" rounded="pill" >
+                    <v-btn v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' && !project.isActive  " @click=" deploy( project ) "
+                        :loading=" loading " :disabled=" loading " color="error" size="small" rounded="pill">
                         Deploy
                     </v-btn>
                     <v-chip v-else-if=" project.isActive " color="green" text-color="white">
                         Active
                     </v-chip>
-                    <v-btn v-else @click=" activate( project.id ) " color="error" size="small" rounded="pill">
+                    <v-btn v-else @click=" activate( project.id ) " color="error" size="small" rounded="pill"
+                        :loading=" loading " :disabled=" loading ">
                         Activate
                     </v-btn>
                 </td>
             </tr>
         </tbody>
     </v-table>
+
+    <div class="text-center">
+        <v-container>
+            <v-row justify="center">
+                <v-col cols="8">
+                    <v-container class="max-width">
+                        <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click="getData"
+                            :loading=" loading " :disabled=" loading "></v-pagination>
+                    </v-container>
+                </v-col>
+            </v-row>
+        </v-container>
+    </div>
 </template>
 
 <script>
@@ -102,13 +116,16 @@ export default {
             this.loading = true
             this.error = null
 
-            await axios.post( controlService + 'project', {
+            await axios.post( controlService + 'project/create', {
+                id: project.id,
                 username: project.student.user.username,
                 sourceCode: project.sourceCode,
+                type: project.type,
+                runtimeVersion: project.runtimeVersion
             } )
                 .then( ( response ) => {
-                    console.log( response )
-                    this.activate( project.id )
+                    console.log(response);
+                    this.activate( project.id, response.data.url )
                 } )
                 .catch( ( error ) => {
                     this.error = error
@@ -116,10 +133,11 @@ export default {
                 } )
         },
 
-        async activate ( id ) {
+        async activate ( id, url ) {
             this.loading = true
             await axios.patch( projectService + 'admin/activate-project', {
                 id: id,
+                url: url
             } ).then( () => this.getData() )
                 .catch( ( error ) => {
                     this.error = error

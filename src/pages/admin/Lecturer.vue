@@ -64,7 +64,7 @@ export default {
       itemPerPage: 25,
       name: null,
       isActive: "All",
-      page: null
+      page: 1
     }
   },
   beforeMount () {

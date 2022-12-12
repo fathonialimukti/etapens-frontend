@@ -58,7 +58,7 @@ export default {
             data: null,
             itemPerPage: 25,
             totalPage: null,
-            page: null,
+            page: 1,
             searchName: null,
             isActive: "All",
             createNewTech: null,

@@ -63,7 +63,7 @@ export default {
       data: undefined,
       itemPerPage: 25,
       totalPage: null,
-      page: null,
+      page: 1,
       name: null,
       role: "Student",
       isActive: "All"

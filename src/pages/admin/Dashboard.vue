@@ -65,7 +65,7 @@ export default {
             itemPerPage: 25,
             totalPage: null,
             totalUser: null,
-            page: null,
+            page: 1,
             email: null,
             role: "Student",
             isActive: "All"

@@ -1,2 +1,2 @@
-export const projectService = "https://54.254.66.71:4000/"
-export const controlService = "https://54.254.66.71:5000/"
+export const projectService = "https://ec2-54-151-179-33.ap-southeast-1.compute.amazonaws.com:4000//"
+export const controlService = "https://ec2-54-151-179-33.ap-southeast-1.compute.amazonaws.com:5000/"

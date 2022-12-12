@@ -29,6 +29,7 @@
         </th>
       </tr>
     </thead>
+    <p>{{error}}</p>
     <tbody>
       <tr v-for=" database  in data" :key=" database.id ">
         <td>{{ database.student.name }}</td>
@@ -84,6 +85,7 @@ export default {
       name: null,
       isActive: "All",
       loading: false,
+      error: null
     }
   },
   beforeMount () {
@@ -103,21 +105,25 @@ export default {
         .then( ( response ) => {
           this.data = response.data.data
           this.totalPage = response.data.totalPage
+        } ).catch( ( response ) => {
+          this.error = response.data.message
         } )
       this.loading = false
     },
 
     async deploy ( database ) {
-      console.log( database )
-      this.activate( database.id )
+      axios.post( controlService + 'database/create', {
+        
+      } ).then( this.activate( database.id ) )
+      
     },
     async activate ( id ) {
       this.loading = true
       axios.patch( projectService + 'admin/activate-database', {
         id: id,
       } ).then( () => this.getData() )
-        .catch( function ( error ) {
-          console.log( error )
+        .catch( ( response ) => {
+          this.error = response.data.message
         } )
       this.getData()
       this.loading = false

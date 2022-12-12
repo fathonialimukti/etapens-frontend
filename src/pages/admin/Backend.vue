@@ -116,8 +116,8 @@ export default {
         .then( ( response ) => {
           this.activate( backend.id, response.data.url )
         } )
-        .catch( ( error ) => {
-          this.error = error
+        .catch( ( response ) => {
+          this.error = response.data.message
           this.loading = false
         } )
     },
@@ -127,8 +127,8 @@ export default {
         id: id,
         url: url
       } ).then( () => this.getData() )
-        .catch( ( error ) => {
-          this.error = error
+        .catch( ( response ) => {
+          this.error = response.data.message
         } )
       this.loading = false
     }

@@ -108,6 +108,8 @@ export default {
                 .then( ( response ) => {
                     this.data = response.data.data
                     this.totalPage = response.data.totalPage
+                } ).catch( ( response ) => {
+                    this.error = response.data.message
                 } )
             this.loading = false
         },
@@ -124,11 +126,10 @@ export default {
                 runtimeVersion: project.runtimeVersion
             } )
                 .then( ( response ) => {
-                    console.log(response);
                     this.activate( project.id, response.data.url )
                 } )
-                .catch( ( error ) => {
-                    this.error = error
+                .catch( ( response ) => {
+                    this.error = response.data.message
                     this.loading = false
                 } )
         },
@@ -139,8 +140,8 @@ export default {
                 id: id,
                 url: url
             } ).then( () => this.getData() )
-                .catch( ( error ) => {
-                    this.error = error
+                .catch( ( response ) => {
+                    this.error = response.data.message
                 } )
             this.loading = false
         }

@@ -23,6 +23,7 @@
                 </th>
             </tr>
         </thead>
+        <p>{{error}}</p>
         <tbody>
             <tr v-for=" user in data" :key=" user.id ">
                 <td>{{ user.username }}</td>
@@ -68,7 +69,8 @@ export default {
             page: 1,
             email: null,
             role: "Student",
-            isActive: "All"
+            isActive: "All",
+            error: null
         }
     },
     beforeMount () {
@@ -95,9 +97,9 @@ export default {
             axios.patch( projectService + 'admin/grant-admin', {
                 id: id
             } )
-                .then( () => this.getData() )
-                .catch( function ( error ) {
-                    console.log( error )
+                .then( this.getData() )
+                .catch( ( response ) => {
+                    this.error = response.data.message
                 } )
         }
     },

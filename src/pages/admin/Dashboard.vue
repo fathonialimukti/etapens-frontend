@@ -97,7 +97,7 @@ export default {
             axios.patch( projectService + 'admin/grant-admin', {
                 id: id
             } )
-                .then( this.getData() )
+                .then( () => this.getData() )
                 .catch( ( response ) => {
                     this.error = response.data.message
                 } )

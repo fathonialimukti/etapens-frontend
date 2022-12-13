@@ -29,9 +29,9 @@
         </th>
       </tr>
     </thead>
-    <p>{{error}}</p>
+    <p>{{ error }}</p>
     <tbody>
-      <tr v-for=" database  in data" :key=" database.id ">
+      <tr v-for="  database   in data" :key=" database.id ">
         <td>{{ database.student.name }}</td>
         <td> {{ database.name }} </td>
         <td>
@@ -47,7 +47,8 @@
           <p>{{ database.password }}</p>
         </td>
         <td>
-          <v-btn v-if=" !database.isActive " @click=" deploy( database ) " color="error" size="small" rounded="pill" :loading="loading" :disabled="loading">
+          <v-btn v-if=" !database.isActive " @click=" deploy( database ) " color="error" size="small" rounded="pill"
+            :loading=" loading " :disabled=" loading ">
             Deploy
           </v-btn>
           <v-chip v-else color="green" text-color="white">
@@ -63,7 +64,8 @@
       <v-row justify="center">
         <v-col cols="8">
           <v-container class="max-width">
-            <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click=" getData "  :loading="loading" :disabled="loading"></v-pagination>
+            <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click=" getData " :loading=" loading "
+              :disabled=" loading "></v-pagination>
           </v-container>
         </v-col>
       </v-row>
@@ -106,16 +108,25 @@ export default {
           this.data = response.data.data
           this.totalPage = response.data.totalPage
         } ).catch( ( response ) => {
-          this.error = response.data.message
+          this.error = response.data
         } )
       this.loading = false
     },
 
-    async deploy ( database ) {
+    async deploy ( db ) {
+      this.loading = true
+      console.log(db);
       axios.post( controlService + 'database/create', {
-        
-      } ).then( this.activate( database.id ) )
-      
+        dbname: db.name,
+        type: db.type,
+        username: db.username,
+        password: db.password
+      } ).then( ()=>this.activate( db.id ) )
+        .catch( ( response ) => {
+          this.error = response.data
+          this.loading = false
+        } )
+
     },
     async activate ( id ) {
       this.loading = true
@@ -123,7 +134,7 @@ export default {
         id: id,
       } ).then( () => this.getData() )
         .catch( ( response ) => {
-          this.error = response.data.message
+          this.error = response.data
         } )
       this.getData()
       this.loading = false

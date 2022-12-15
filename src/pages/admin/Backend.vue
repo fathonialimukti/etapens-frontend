@@ -25,7 +25,7 @@
           <h1 class=" font-bold text-lg">Repository</h1>
         </th>
         <th class="text-left">
-          <h1 class=" font-bold text-lg">Status</h1>
+          <h1 class=" font-bold text-lg">Action</h1>
         </th>
       </tr>
     </thead>
@@ -40,12 +40,33 @@
           </a>
         </td>
         <td>
-          <v-btn v-if=" !backend.isActive " @click=" deploy( backend ) " color="error" size="small" rounded="pill" :loading="loading" :disabled="loading">
-            Deploy
-          </v-btn>
-          <v-chip v-else color="green" text-color="white">
-            Active
-          </v-chip>
+          <v-row>
+            <v-tooltip v-if=" backend.isActive " location="start" text="Active">
+              <template v-slot:activator=" { props } ">
+                <v-btn v-bind=" props " color="success" icon="mdi-bookmark-check-outline" size="small"></v-btn>
+              </template>
+            </v-tooltip>
+            <v-tooltip v-if=" !backend.isActive " location="start"
+              text="Deploy App">
+              <template v-slot:activator=" { props } ">
+                <v-btn v-bind=" props " color="error" icon="mdi-play" size="small" @click=" deploy( backend ) "
+                  :loading=" loading " :disabled=" loading "></v-btn>
+              </template>
+            </v-tooltip>
+            <v-tooltip v-else-if=" backend.isActive " location="start"
+              text="Stop Application">
+              <template v-slot:activator=" { props } ">
+                <v-btn v-bind=" props " color="error" icon="mdi-play-pause" size="small" @click=" stop( backend ) "
+                  :loading=" loading " :disabled=" loading "></v-btn>
+              </template>
+            </v-tooltip>
+            <!-- <v-tooltip location="start" text="Delete">
+                                  <template v-slot:activator=" { props } ">
+                                      <v-btn v-bind=" props " color="error" icon="mdi-delete-alert-outline" size="small"
+                                          @click=" deleteProject( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
+                                  </template>
+                              </v-tooltip> -->
+          </v-row>
         </td>
       </tr>
     </tbody>
@@ -97,6 +118,7 @@ export default {
         params: query
       } )
         .then( ( response ) => {
+          console.log(response);
           this.data = response.data.data
           this.totalPage = response.data.totalPage
         } )
@@ -111,13 +133,13 @@ export default {
         username: backend.student.user.username,
         sourceCode: backend.sourceCode,
         id: backend.id,
-        runtimeVersion: project.runtimeVersion
+        runtimeVersion: backend.runtimeVersion
       } )
         .then( ( response ) => {
           this.activate( backend.id, response.data.url )
         } )
         .catch( ( response ) => {
-          this.error = response.data.message
+          this.error = response.data
           this.loading = false
         } )
     },
@@ -128,10 +150,26 @@ export default {
         url: url
       } ).then( () => this.getData() )
         .catch( ( response ) => {
-          this.error = response.data.message
+          this.error = response.data
         } )
       this.loading = false
-    }
+    },
+
+    async stop ( backend ) {
+      this.loading = true
+      this.error = null
+
+      await axios.post( controlService + 'backend/stop', {
+        id: backend.id,
+      } )
+        // .then( ( response ) => {
+        //   this.activate( backend.id, response.data.url )
+        // } )
+        .catch( ( response ) => {
+          this.error = response.data
+          this.loading = false
+        } )
+    },
   },
   watch: {
     isActive () {

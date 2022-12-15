@@ -21,12 +21,12 @@
                     <h1 class=" font-bold text-lg">Type / Repository</h1>
                 </th>
                 <th class="text-left">
-                    <h1 class=" font-bold text-lg">Status</h1>
+                    <h1 class=" font-bold text-lg">Action</h1>
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for=" project  in data" :key=" project.id ">
+            <tr v-for=" project in data" :key=" project.id ">
                 <td>
                     <router-link :to=" { name: 'Project', params: { title: project.title } } "
                         class="flex flex-wrap font-bold " target="_blank">
@@ -43,17 +43,43 @@
                     <p v-else>{{ project.type }}</p>
                 </td>
                 <td>
-                    <v-btn v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' && !project.isActive  " @click=" deploy( project ) "
-                        :loading=" loading " :disabled=" loading " color="error" size="small" rounded="pill">
-                        Deploy
-                    </v-btn>
-                    <v-chip v-else-if=" project.isActive " color="green" text-color="white">
-                        Active
-                    </v-chip>
-                    <v-btn v-else @click=" activate( project.id ) " color="error" size="small" rounded="pill"
-                        :loading=" loading " :disabled=" loading ">
-                        Activate
-                    </v-btn>
+                    <v-row>
+                        <v-tooltip v-if=" project.isActive " location="start" text="Active">
+                            <template v-slot:activator=" { props } ">
+                                <v-btn v-bind=" props " color="success" icon="mdi-bookmark-check-outline"
+                                    size="small"></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip v-if=" !project.isActive && project.type == 'Generals' " location="start"
+                            text="Activate">
+                            <template v-slot:activator=" { props } ">
+                                <v-btn v-bind=" props " color="error" icon="mdi-bookmark-minus-outline" size="small"
+                                    @click=" activate( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip
+                            v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && !project.isActive "
+                            location="start" text="Deploy App">
+                            <template v-slot:activator=" { props } ">
+                                <v-btn v-bind=" props " color="error" icon="mdi-play" size="small"
+                                    @click=" deploy( project ) " :loading=" loading " :disabled=" loading "></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip
+                            v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && project.isActive "
+                            location="start" text="Stop Application">
+                            <template v-slot:activator=" { props } ">
+                                <v-btn v-bind=" props " color="error" icon="mdi-play-pause" size="small"
+                                    @click=" stop( project ) " :loading=" loading " :disabled=" loading "></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <!-- <v-tooltip location="start" text="Delete">
+                        <template v-slot:activator=" { props } ">
+                            <v-btn v-bind=" props " color="error" icon="mdi-delete-alert-outline" size="small"
+                                @click=" deleteProject( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
+                        </template>
+                    </v-tooltip> -->
+                    </v-row>
                 </td>
             </tr>
         </tbody>
@@ -118,20 +144,34 @@ export default {
             this.loading = true
             this.error = null
 
-            await axios.post( controlService + 'project/create', {
-                id: project.id,
-                username: project.student.user.username,
-                sourceCode: project.sourceCode,
-                type: project.type,
-                runtimeVersion: project.runtimeVersion
-            } )
-                .then( ( response ) => {
-                    this.activate( project.id, response.data.url )
+            if ( project.type == 'NodeJs' ) {
+                await axios.post( controlService + 'project/create-nodejs', {
+                    id: project.id,
+                    username: project.student.user.username,
+                    sourceCode: project.sourceCode,
+                    runtimeVersion: project.runtimeVersion
                 } )
-                .catch( ( response ) => {
-                    this.error = response.data
-                    this.loading = false
+                    .then( ( response ) => {
+                        this.activate( project.id, response.data.url )
+                    } )
+                    .catch( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+            } else if ( project.type == 'WebStatic' ) {
+                await axios.post( controlService + 'project/create-webstatic', {
+                    id: project.id,
+                    username: project.student.user.username,
+                    sourceCode: project.sourceCode,
                 } )
+                    .then( ( response ) => {
+                        this.activate( project.id, response.data.url )
+                    } )
+                    .catch( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+            } else { this.error = "App type is missing" }
         },
 
         async activate ( id, url ) {
@@ -140,6 +180,52 @@ export default {
                 id: id,
                 url: url
             } ).then( () => this.getData() )
+                .catch( ( response ) => {
+                    this.error = response.data
+                } )
+            this.loading = false
+        },
+
+        async update ( project ) {
+            this.loading = true
+            this.error = null
+
+            if ( project.type == 'NodeJs' ) {
+                await axios.post( controlService + 'project/update-nodejs', {
+                    id: project.id,
+                    username: project.student.user.username,
+                    sourceCode: project.sourceCode,
+                    runtimeVersion: project.runtimeVersion
+                } )
+                    // .then( ( response ) => {
+                    //     this.activate( project.id, response.data.url )
+                    // } )
+                    .catch( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+            } else if ( project.type == 'WebStatic' ) {
+                await axios.post( controlService + 'project/update-webstatic', {
+                    id: project.id,
+                    username: project.student.user.username,
+                    sourceCode: project.sourceCode,
+                } )
+                    // .then( ( response ) => {
+                    //     this.activate( project.id, response.data.url )
+                    // } )
+                    .catch( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+            } else { this.error = "App type is missing" }
+        },
+
+        async stop ( project ) {
+            this.loading = true
+            await axios.post( controlService + 'project/stop', {
+                id: project.id,
+            } )
+                // .then( () => this.getData() )
                 .catch( ( response ) => {
                     this.error = response.data
                 } )

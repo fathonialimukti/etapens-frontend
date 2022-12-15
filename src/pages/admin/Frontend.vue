@@ -109,7 +109,7 @@ export default {
                     this.data = response.data.data
                     this.totalPage = response.data.totalPage
                 } ).catch( ( response ) => {
-                    this.error = response.data.message
+                    this.error = response.data
                 } )
             this.loading = false
         },
@@ -129,7 +129,7 @@ export default {
                     this.activate( project.id, response.data.url )
                 } )
                 .catch( ( response ) => {
-                    this.error = response.data.message
+                    this.error = response.data
                     this.loading = false
                 } )
         },
@@ -141,7 +141,7 @@ export default {
                 url: url
             } ).then( () => this.getData() )
                 .catch( ( response ) => {
-                    this.error = response.data.message
+                    this.error = response.data
                 } )
             this.loading = false
         }

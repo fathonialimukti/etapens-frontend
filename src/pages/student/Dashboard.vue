@@ -115,8 +115,9 @@
         <v-card-title> Password </v-card-title>
         <v-card-text>{{ user.database.password }}</v-card-text>
 
-        <v-card-title> Url </v-card-title>
-        <v-card-text>{{ user.database.url }}</v-card-text>
+z        <v-card-title> Host </v-card-title>
+        <v-card-text v-if=" user.database.type == 'mysql' ">ec2-52-74-228-86.ap-southeast-1.compute.amazonaws.com:3306</v-card-text>
+        <v-card-text v-if=" user.database.type == 'postgres' ">ec2-52-74-228-86.ap-southeast-1.compute.amazonaws.com:5432</v-card-text>
 
         <v-card-actions>
           <v-spacer></v-spacer>

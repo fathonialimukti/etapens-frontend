@@ -145,7 +145,7 @@ export default {
             this.error = null
 
             if ( project.type == 'NodeJs' ) {
-                await axios.post( controlService + 'project/create-nodejs', {
+                await axios.post( controlService + 'frontend/create-nodejs', {
                     id: project.id,
                     username: project.student.user.username,
                     sourceCode: project.sourceCode,
@@ -159,7 +159,7 @@ export default {
                         this.loading = false
                     } )
             } else if ( project.type == 'WebStatic' ) {
-                await axios.post( controlService + 'project/create-webstatic', {
+                await axios.post( controlService + 'frontend/create-webstatic', {
                     id: project.id,
                     username: project.student.user.username,
                     sourceCode: project.sourceCode,
@@ -191,7 +191,7 @@ export default {
             this.error = null
 
             if ( project.type == 'NodeJs' ) {
-                await axios.post( controlService + 'project/update-nodejs', {
+                await axios.post( controlService + 'frontend/update-nodejs', {
                     id: project.id,
                     username: project.student.user.username,
                     sourceCode: project.sourceCode,
@@ -205,7 +205,7 @@ export default {
                         this.loading = false
                     } )
             } else if ( project.type == 'WebStatic' ) {
-                await axios.post( controlService + 'project/update-webstatic', {
+                await axios.post( controlService + 'frontend/update-webstatic', {
                     id: project.id,
                     username: project.student.user.username,
                     sourceCode: project.sourceCode,
@@ -222,7 +222,7 @@ export default {
 
         async stop ( project ) {
             this.loading = true
-            await axios.post( controlService + 'project/stop', {
+            await axios.post( controlService + 'frontend/stop', {
                 id: project.id,
             } )
                 // .then( () => this.getData() )

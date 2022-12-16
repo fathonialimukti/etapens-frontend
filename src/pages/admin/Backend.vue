@@ -89,7 +89,7 @@
 
 <script>
 import axios from "axios"
-import { controlService, backendService } from "../../constant/endpoint"
+import { controlService, proj, projectServiceprojectService } from "../../constant/endpoint"
 
 export default {
   data () {
@@ -116,7 +116,7 @@ export default {
       if ( this.name ) query.name = this.name
       if ( this.isActive ) query.isActive = this.isActive
 
-      axios.get( backendService + 'admin/list-backend', {
+      axios.get( projectService + 'admin/list-backend', {
         params: query
       } )
         .then( ( response ) => {
@@ -166,7 +166,7 @@ export default {
     },
 
     async activate ( id, url ) {
-      await axios.patch( backendService + 'admin/activate-backend', {
+      await axios.patch( projectService + 'admin/activate-backend', {
         id: id,
         url: url
       } ).then( () => this.getData() )

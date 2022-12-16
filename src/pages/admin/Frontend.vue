@@ -26,7 +26,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for=" project in data" :key=" project.id ">
+            <tr v-for="     project     in data" :key=" project.id ">
                 <td>
                     <router-link :to=" { name: 'Project', params: { title: project.title } } "
                         class="flex flex-wrap font-bold " target="_blank">
@@ -43,49 +43,41 @@
                     <p v-else>{{ project.type }}</p>
                 </td>
                 <td>
-                        <v-tooltip v-if=" project.isActive " location="start" text="Active">
-                            <template v-slot:activator=" { props } ">
-                                <v-btn v-bind=" props " color="success" icon="mdi-bookmark-check-outline"
-                                    size="small"></v-btn>
-                            </template>
-                        </v-tooltip>
-                        <v-tooltip v-if=" !project.isActive && project.type == 'Generals' " location="start"
-                            text="Activate">
-                            <template v-slot:activator=" { props } ">
-                                <v-btn v-bind=" props " color="error" icon="mdi-bookmark-minus-outline" size="small"
-                                    @click=" activate( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
-                            </template>
-                        </v-tooltip>
-                        <v-tooltip
-                            v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && !project.isActive "
-                            location="start" text="Deploy App">
-                            <template v-slot:activator=" { props } ">
-                                <v-btn v-bind=" props " color="error" icon="mdi-play" size="small"
-                                    @click=" deploy( project ) " :loading=" loading " :disabled=" loading "></v-btn>
-                            </template>
-                        </v-tooltip>
-                        <v-tooltip
-                            v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && project.isActive "
-                            location="start" text="Update">
-                            <template v-slot:activator=" { props } ">
-                                <v-btn v-bind=" props " color="warning" icon="mdi-update" size="small"
-                                    @click=" update( project ) " :loading=" loading " :disabled=" loading "></v-btn>
-                            </template>
-                        </v-tooltip>
-                        <v-tooltip
-                            v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && project.isActive "
-                            location="start" text="Stop Application">
-                            <template v-slot:activator=" { props } ">
-                                <v-btn v-bind=" props " color="error" icon="mdi-play-pause" size="small"
-                                    @click=" stop( project ) " :loading=" loading " :disabled=" loading "></v-btn>
-                            </template>
-                        </v-tooltip>
-                        <!-- <v-tooltip location="start" text="Delete">
+                    <v-menu open-on-hover location="start">
                         <template v-slot:activator=" { props } ">
-                            <v-btn v-bind=" props " color="error" icon="mdi-delete-alert-outline" size="small"
-                                @click=" deleteProject( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
+                            <v-btn :color=" project.isActive ? 'success' : 'error' " v-bind=" props ">
+                                {{ project.isActive ? "Active" : "Inactive" }}
+                            </v-btn>
                         </template>
-                    </v-tooltip> -->
+
+                        <v-list v-if=" project.isActive ">
+                            <v-list-item v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' "
+                                @click=" update( project ) ">
+                                <v-icon icon="mdi-update"></v-icon> Update
+                            </v-list-item>
+                            <v-list-item v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' "
+                                @click=" stop( project ) ">
+                                <v-icon icon="mdi-play-pause"></v-icon> Stop
+                            </v-list-item>
+                            <v-list-item v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' "
+                                @click=" start( project ) ">
+                                <v-icon icon="mdi-play"></v-icon> Start
+                            </v-list-item>
+                        </v-list>
+
+                        <v-list v-else>
+                            <v-list-item v-if=" !project.isActive && project.type == 'Generals' "
+                                @click=" activate( project ) ">
+                                <v-icon icon="mdi-bookmark-check-outline"></v-icon> Activate
+                            </v-list-item>
+
+                            <v-list-item
+                                v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && !project.isActive "
+                                @click=" deploy( project ) ">
+                                <v-icon icon="mdi-bookmark-check-outline"></v-icon> Deploy Application
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
                 </td>
             </tr>
         </tbody>
@@ -190,6 +182,40 @@ export default {
                     this.error = response.data
                 } )
             this.loading = false
+        },
+
+        async start ( project ) {
+            this.loading = true
+            this.error = null
+
+            if ( project.type == 'NodeJs' ) {
+                await axios.post( controlService + 'frontend/start-nodejs', {
+                    id: project.id,
+                    username: project.student.user.username,
+                    runtimeVersion: project.runtimeVersion
+                } )
+                    .then( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+                    .catch( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+            } else if ( project.type == 'WebStatic' ) {
+                await axios.post( controlService + 'frontend/start-webstatic', {
+                    id: project.id,
+                    username: project.student.user.username,
+                } )
+                    .then( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+                    .catch( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
+            } else { this.error = "App type is missing" }
         },
 
         async update ( project ) {

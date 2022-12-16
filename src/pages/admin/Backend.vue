@@ -30,7 +30,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="  backend  in data" :key=" backend.id ">
+      <tr v-for="   backend   in data" :key=" backend.id ">
         <td>{{ backend.student.name }}</td>
         <td> {{ backend.description }} </td>
         <td>
@@ -43,35 +43,31 @@
           </a>
         </td>
         <td>
-          <v-tooltip v-if=" backend.isActive " location="start" text="Active">
+          <v-menu open-on-hover location="start">
             <template v-slot:activator=" { props } ">
-              <v-btn v-bind=" props " color="success" icon="mdi-bookmark-check-outline" size="small"></v-btn>
+              <v-btn :color=" backend.isActive ? 'success' : 'error' " v-bind=" props ">
+                {{ backend.isActive ? "Active" : "Inactive" }}
+              </v-btn>
             </template>
-          </v-tooltip>
-          <v-tooltip v-if=" !backend.isActive " location="start" text="Deploy App">
-            <template v-slot:activator=" { props } ">
-              <v-btn v-bind=" props " color="error" icon="mdi-play" size="small" @click=" deploy( backend ) "
-                :loading=" loading " :disabled=" loading "></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip v-else-if=" backend.isActive " location="start" text="Stop Application">
-            <template v-slot:activator=" { props } ">
-              <v-btn v-bind=" props " color="error" icon="mdi-play-pause" size="small" @click=" stop( backend ) "
-                :loading=" loading " :disabled=" loading "></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip v-if=" backend.isActive " location="start" text="Update">
-            <template v-slot:activator=" { props } ">
-              <v-btn v-bind=" props " color="warning" icon="mdi-update" size="small" @click=" update( backend ) "
-                :loading=" loading " :disabled=" loading "></v-btn>
-            </template>
-          </v-tooltip>
-          <!-- <v-tooltip location="start" text="Delete">
-                <template v-slot:activator=" { props } ">
-                    <v-btn v-bind=" props " color="error" icon="mdi-delete-alert-outline" size="small"
-                        @click=" deleteProject( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
-                </template>
-            </v-tooltip> -->
+
+            <v-list v-if=" backend.isActive ">
+              <v-list-item @click=" update( backend ) ">
+                <v-icon icon="mdi-update"></v-icon> Update
+              </v-list-item>
+              <v-list-item @click=" stop( backend ) ">
+                <v-icon icon="mdi-play-pause"></v-icon> Stop
+              </v-list-item>
+              <v-list-item @click=" start( backend ) ">
+                <v-icon icon="mdi-play"></v-icon> Start
+              </v-list-item>
+            </v-list>
+
+            <v-list v-else>
+              <v-list-item @click=" deploy( backend ) ">
+                <v-icon icon="mdi-bookmark-check-outline"></v-icon> Deploy Application
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </td>
       </tr>
     </tbody>
@@ -93,7 +89,7 @@
 
 <script>
 import axios from "axios"
-import { controlService, projectService } from "../../constant/endpoint"
+import { controlService, backendService } from "../../constant/endpoint"
 
 export default {
   data () {
@@ -120,7 +116,7 @@ export default {
       if ( this.name ) query.name = this.name
       if ( this.isActive ) query.isActive = this.isActive
 
-      axios.get( projectService + 'admin/list-backend', {
+      axios.get( backendService + 'admin/list-backend', {
         params: query
       } )
         .then( ( response ) => {
@@ -170,7 +166,7 @@ export default {
     },
 
     async activate ( id, url ) {
-      await axios.patch( projectService + 'admin/activate-backend', {
+      await axios.patch( backendService + 'admin/activate-backend', {
         id: id,
         url: url
       } ).then( () => this.getData() )
@@ -178,6 +174,25 @@ export default {
           this.error = response.data
         } )
       this.loading = false
+    },
+
+    async start ( backend ) {
+      this.loading = true
+      this.error = null
+
+      await axios.post( controlService + 'backend/start', {
+        username: backend.student.user.username,
+        id: backend.id,
+        runtimeVersion: backend.runtimeVersion
+      } )
+        .then( ( response ) => {
+          this.error = response.data
+          this.loading = false
+        } )
+        .catch( ( response ) => {
+          this.error = response.data
+          this.loading = false
+        } )
     },
 
     async stop ( backend ) {

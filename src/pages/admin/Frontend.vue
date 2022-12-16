@@ -43,7 +43,6 @@
                     <p v-else>{{ project.type }}</p>
                 </td>
                 <td>
-                    <v-row>
                         <v-tooltip v-if=" project.isActive " location="start" text="Active">
                             <template v-slot:activator=" { props } ">
                                 <v-btn v-bind=" props " color="success" icon="mdi-bookmark-check-outline"
@@ -67,6 +66,14 @@
                         </v-tooltip>
                         <v-tooltip
                             v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && project.isActive "
+                            location="start" text="Update">
+                            <template v-slot:activator=" { props } ">
+                                <v-btn v-bind=" props " color="warning" icon="mdi-update" size="small"
+                                    @click=" update( project ) " :loading=" loading " :disabled=" loading "></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip
+                            v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && project.isActive "
                             location="start" text="Stop Application">
                             <template v-slot:activator=" { props } ">
                                 <v-btn v-bind=" props " color="error" icon="mdi-play-pause" size="small"
@@ -79,7 +86,6 @@
                                 @click=" deleteProject( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
                         </template>
                     </v-tooltip> -->
-                    </v-row>
                 </td>
             </tr>
         </tbody>
@@ -197,9 +203,10 @@ export default {
                     sourceCode: project.sourceCode,
                     runtimeVersion: project.runtimeVersion
                 } )
-                    // .then( ( response ) => {
-                    //     this.activate( project.id, response.data.url )
-                    // } )
+                    .then( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
                     .catch( ( response ) => {
                         this.error = response.data
                         this.loading = false
@@ -210,9 +217,10 @@ export default {
                     username: project.student.user.username,
                     sourceCode: project.sourceCode,
                 } )
-                    // .then( ( response ) => {
-                    //     this.activate( project.id, response.data.url )
-                    // } )
+                    .then( ( response ) => {
+                        this.error = response.data
+                        this.loading = false
+                    } )
                     .catch( ( response ) => {
                         this.error = response.data
                         this.loading = false
@@ -225,7 +233,10 @@ export default {
             await axios.post( controlService + 'frontend/stop', {
                 id: project.id,
             } )
-                // .then( () => this.getData() )
+                .then( ( response ) => {
+                    this.error = response.data
+                    this.loading = false
+                } )
                 .catch( ( response ) => {
                     this.error = response.data
                 } )

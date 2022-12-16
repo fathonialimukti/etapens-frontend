@@ -89,7 +89,7 @@
 
 <script>
 import axios from "axios"
-import { controlService, proj, projectServiceprojectService } from "../../constant/endpoint"
+import { controlService, projectService } from "../../constant/endpoint"
 
 export default {
   data () {

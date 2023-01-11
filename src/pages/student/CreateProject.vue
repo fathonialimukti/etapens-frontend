@@ -4,10 +4,11 @@
             prepend-icon="mdi-format-title" clearable />
 
         <v-textarea v-model=" project.description " label="Deskripsi atau Abstract"
-             prepend-icon="mdi-sticker-text-outline" :rules=" [ v => !!v || 'Description is Required' ] " clearable />
+            prepend-icon="mdi-sticker-text-outline" :rules=" [ v => !!v || 'Description is Required' ] " clearable />
 
         <v-autocomplete label="Dosen pembimbing" v-model=" project.lecturers " v-model:search=" search.lecturers "
-            @input=" findLecturer " :items=" list.lecturers " item-title="name" :rules=" [ v => !!v || 'Lecturers list is Required', v => v.length < 4 || 'This maybe a mistake' ] "
+            @input=" findLecturer " :items=" list.lecturers " item-title="name"
+            :rules=" [ v => !!v || 'Lecturers list is Required', v => v.length < 4 || 'This maybe a mistake' ] "
             placeholder="Start typing then enter search" prepend-icon="mdi-human-male-board-poll" chips closable-chips
             return-object multiple hide-no-data hide-selected />
 
@@ -19,14 +20,13 @@
             :rules=" [ v => !!v || 'App type is Required' ] " prepend-icon="mdi-format-list-bulleted-type" />
 
         <v-autocomplete v-if=" project.type == 'NodeJs' " label="Versi Node js" v-model=" project.runtimeVersion "
-            :items=" [ 16, 18 ] " :rules=" [ v => !!v || 'Node version is Required' ] "
-            prepend-icon="mdi-nodejs" />
+            :items=" [ 16, 18 ] " :rules=" [ v => !!v || 'Node version is Required' ] " prepend-icon="mdi-nodejs" />
 
         <v-text-field v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' " v-model=" project.sourceCode "
             label="Source Code" :rules=" [ v => !!v || 'Source Code is Required' ] " prepend-icon="mdi-git" clearable />
 
-        <v-text-field v-if=" project.type == 'SelfHostedWeb' " v-model=" project.url "
-            label="Url Aplikasi" :rules=" [ v => !!v || 'Url is Required' ] " prepend-icon="mdi-web" clearable />
+        <v-text-field v-if=" project.type == 'SelfHostedWeb' " v-model=" project.url " label="Url Aplikasi"
+            :rules=" [ v => !!v || 'Url is Required' ] " prepend-icon="mdi-web" clearable />
 
         <v-autocomplete label="Teknologi yang digunakan" v-model=" project.tech " v-model:search=" search.tech "
             @input=" findTech " :items=" list.tech " item-title="name" :rules=" [ v => !!v || 'Tech is Required' ] "
@@ -57,16 +57,14 @@
         <p>{{ error }}</p>
         <p>{{ status }}</p>
 
-        <v-btn color="success" class="mr-4" @click=" validate " :loading="loading" :disabled="loading">
+        <v-btn color="success" class="mr-4" @click=" validate " :loading=" loading " :disabled=" loading ">
             Submit
         </v-btn>
     </v-form>
 </template>
 
 <script>
-import { Storage } from 'aws-amplify'
-import axios from 'axios'
-import { projectService } from '../../constant/endpoint'
+import { Storage, API } from 'aws-amplify'
 import useAuthStore from '../../stores/auth'
 
 const store = useAuthStore()
@@ -115,7 +113,7 @@ export default {
             else return
         },
         async submit () {
-            this.loading = true 
+            this.loading = true
             this.error = false
             var project = this.project
             const documents = project.documents
@@ -127,18 +125,28 @@ export default {
             project.documents = []
             project.images = []
 
-            const baseUrl = "https://etapens-storage140101-dev.s3.ap-southeast-1.amazonaws.com/public/"
+            const baseUrl = 'https://pjj2022-fathoni-etapens-storage.s3.ap-southeast-1.amazonaws.com/public/'
+
+            project.tech.forEach( obj => {
+                delete obj.name
+            } )
+
+            project.method.forEach( obj => {
+                delete obj.name
+            } )
+
+            project.researchField.forEach( obj => {
+                delete obj.name
+            } )
+
 
             // validate project
-            await axios( {
-                method: "post",
-                url: projectService + "student/project",
-                data: project,
-                headers: { "Content-Type": "application/json" },
+            await API.post( 'etapens', "/student/project", {
+                body: project,
             } )
-                .then( ( response ) => {
-                    this.status = response.message
-                    project = response.data
+                .then( ( result ) => {
+                    this.status = result.message
+                    project = result
                 } )
                 .catch( ( error ) => {
                     this.error = "Error:" + error
@@ -195,16 +203,13 @@ export default {
             }
 
             // update project
-            await axios( {
-                method: "patch",
-                url: projectService + "student/project",
-                data: project,
-                headers: { "Content-Type": "application/json" },
+            await API.patch( 'etapens', "/student/project", {
+                body: project,
             } )
-                .then( ( response ) => {
-                    this.status = response.message
+                .then( ( result ) => {
+                    this.status = result.message
                 } )
-                .catch( (error) => {
+                .catch( ( error ) => {
                     this.error = error
                 } )
 
@@ -219,58 +224,58 @@ export default {
 
         async findLecturer () {
             const name = this.search.lecturers
-            await axios.get(
-                projectService + 'find-lecturer',
-                { params: { name } }
+            await API.get(
+                'etapens', '/find-lecturer',
+                { queryStringParameters: { name: name } }
             )
-                .then( ( response ) => {
-                    this.list.lecturers = response.data
+                .then( ( result ) => {
+                    this.list.lecturers = result
                 } )
-                .catch( ( response ) => {
-                    this.list.lecturers[ 0 ] = response.error
+                .catch( ( result ) => {
+                    this.list.lecturers[ 0 ] = result.error
                 } )
         },
         async findTech () {
             const search = this.search.tech
-            await axios.get(
-                projectService + 'find-tech-list',
-                { params: { name: search } }
+            await API.get(
+                'etapens', '/find-tech-list',
+                { queryStringParameters: { name: search } }
             )
-                .then( ( response ) => {
-                    this.list.tech = response.data.data
+                .then( ( result ) => {
+                    this.list.tech = result.data
                 } )
-                .catch( ( response ) => {
-                    this.list.tech[ 0 ] = response.error
+                .catch( ( result ) => {
+                    this.list.tech[ 0 ] = result.error
                 } )
         },
         async findResearchFields () {
             const search = this.search.researchField
-            await axios.get(
-                projectService + 'find-research-field',
-                { params: { name: search } }
+            await API.get(
+                'etapens', '/find-research-field',
+                { queryStringParameters: { name: search } }
             )
-                .then( ( response ) => {
-                    this.list.researchField = response.data.data
+                .then( ( result ) => {
+                    this.list.researchField = result.data
                 } )
-                .catch( ( response ) => {
-                    this.list.researchField[ 0 ] = response.error
+                .catch( ( result ) => {
+                    this.list.researchField[ 0 ] = result.error
                 } )
         },
         async findMethods () {
             const search = this.search.method
-            await axios.get(
-                projectService + 'find-research-method',
-                { params: { name: search } }
+            await API.get(
+                'etapens', '/find-research-method',
+                { queryStringParameters: { name: search } }
             )
-                .then( ( response ) => {
-                    this.list.method = response.data.data
+                .then( ( result ) => {
+                    this.list.method = result.data
                 } )
-                .catch( ( response ) => {
-                    this.list.method[ 0 ] = response.error
+                .catch( ( result ) => {
+                    this.list.method[ 0 ] = result.error
                 } )
         },
     },
-    mounted() {
+    mounted () {
         this.findLecturer()
         this.findMethods()
         this.findResearchFields()

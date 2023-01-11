@@ -21,8 +21,7 @@
     </v-form>
 </template>
 <script>
-import axios from 'axios'
-import { projectService } from '../../constant/endpoint'
+import { API } from 'aws-amplify'
 import useAuthStore from '../../stores/auth'
 
 const store = useAuthStore()
@@ -65,12 +64,12 @@ export default {
             this.loading = true
             this.error = false
 
-            await axios.post(
-                projectService + "student/backend",
-                this.backend,
+            await API.post(
+                'etapens', "/student/backend",
+                { body: this.backend }
             )
-                .catch( ( response ) => {
-                    this.error = response.message
+                .catch( ( result ) => {
+                    this.error = result.message
                 } )
             if ( this.error ) {
                 this.loading = false

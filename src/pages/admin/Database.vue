@@ -31,7 +31,7 @@
     </thead>
     <p>{{ error }}</p>
     <tbody>
-      <tr v-for="  database   in data" :key=" database.id ">
+      <tr v-for=" database  in data" :key=" database.id ">
         <td>{{ database.student.name }}</td>
         <td> {{ database.name }} </td>
         <td>
@@ -74,8 +74,8 @@
 </template>
 
 <script>
-import axios from "axios"
-import { controlService, projectService } from "../../constant/endpoint"
+
+import { API } from "aws-amplify"
 
 export default {
   data () {
@@ -101,40 +101,42 @@ export default {
       if ( this.name ) query.name = this.name
       if ( this.isActive ) query.isActive = this.isActive
 
-      axios.get( projectService + 'admin/list-database', {
-        params: query
+      await API.get( 'etapens', '/admin/list-database', {
+        queryStringParameters: query
       } )
-        .then( ( response ) => {
-          this.data = response.data.data
-          this.totalPage = response.data.totalPage
-        } ).catch( ( response ) => {
-          this.error = response.data
+        .then( ( result ) => {
+          this.data = result.data
+          this.totalPage = result.totalPage
+        } ).catch( ( result ) => {
+          this.error = result
         } )
       this.loading = false
     },
 
     async deploy ( db ) {
       this.loading = true
-      console.log(db);
-      axios.post( controlService + 'database/create', {
-        dbname: db.name,
-        type: db.type,
-        username: db.username,
-        password: db.password
-      } ).then( ()=>this.activate( db.id ) )
-        .catch( ( response ) => {
-          this.error = response.data
+
+      await API.post( 'etapens', '/database/create', {
+        body: {
+          dbname: db.name,
+          type: db.type,
+          username: db.username,
+          password: db.password
+        }
+      } ).then( () => this.activate( db.id ) )
+        .catch( ( result ) => {
+          this.error = result
           this.loading = false
         } )
 
     },
     async activate ( id ) {
       this.loading = true
-      axios.patch( projectService + 'admin/activate-database', {
-        id: id,
+      await API.patch( 'etapens', '/admin/activate-database', {
+        body: { id: id }
       } ).then( () => this.getData() )
-        .catch( ( response ) => {
-          this.error = response.data
+        .catch( ( result ) => {
+          this.error = result
         } )
       this.getData()
       this.loading = false

@@ -21,13 +21,14 @@
         </th>
       </tr>
     </thead>
+    <p>{{ error }}</p>
     <tbody>
-      <tr v-for=" student  in data" :key=" student.id ">
+      <tr v-for="   student    in data" :key=" student.id ">
         <td>
           <v-avatar rounded="0" :image=" student.image " />
           {{ student.name }}
         </td>
-        <td>{{ student.name }}</td>
+        <td>{{ student.nrp }}</td>
         <td>
           <v-chip v-if=" student.isActive " color="green" text-color="white">
             Active
@@ -54,8 +55,8 @@
 </template>
 
 <script>
-import axios from "axios"
-import { projectService } from "../../constant/endpoint"
+
+import { API } from "aws-amplify"
 
 export default {
   data () {
@@ -73,28 +74,28 @@ export default {
     this.getData()
   },
   methods: {
-    getData () {
+    async getData () {
       const query = {}
       if ( this.itemPerPage ) query.itemPerPage = this.itemPerPage
       if ( this.name ) query.name = this.name
       if ( this.isActive ) query.isActive = this.isActive
       if ( this.page ) query.page = this.page
 
-      axios
-        .get( projectService + 'admin/list-student', {
-          params: query
+      await API
+        .get( 'etapens', '/admin/list-student', {
+          queryStringParameters: query
         } )
-        .then( response => {
-          this.data = response.data.data
-          this.totalPage = response.data.totalPage
-        } )
+        .then( result => {
+          this.data = result.data
+          this.totalPage = result.totalPage
+        } ).catch(error => console.log(error))
     },
-    activate ( id ) {
-      axios.patch( projectService + 'admin/activate-student', {
-        id: id
+    async activate ( id ) {
+      await API.patch( 'etapens', '/admin/activate-student', {
+        body:{id: id}
       } )
         .then( () => this.getData() )
-        .catch( function ( error ) {
+        .catch( ( error ) => {
           console.log( error )
         } )
     }

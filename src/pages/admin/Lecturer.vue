@@ -21,8 +21,9 @@
         </th>
       </tr>
     </thead>
+    <p>{{ error }}</p>
     <tbody>
-      <tr v-for="  lecturer  in data" :key=" lecturer.id ">
+      <tr v-for="    lecturer    in data" :key=" lecturer.id ">
         <td>
           <v-avatar rounded="0" :image=" lecturer.image " />
           {{ lecturer.name }}
@@ -32,7 +33,8 @@
           <v-chip v-if=" lecturer.isActive " color="green" text-color="white">
             Active
           </v-chip>
-          <v-btn v-else @click=" activate( lecturer.id ) " color="error" size="small" rounded="pill" :loading="loading" :disabled="loading">
+          <v-btn v-else @click=" activate( lecturer.id ) " color="error" size="small" rounded="pill"
+            :loading=" loading " :disabled=" loading ">
             Activate
           </v-btn>
         </td>
@@ -54,14 +56,14 @@
 </template>
 
 <script>
-import axios from "axios"
-import { projectService } from "../../constant/endpoint"
+import { API } from 'aws-amplify'
 
 export default {
   data () {
     return {
       data: undefined,
       itemPerPage: 25,
+      totalPage: 1,
       name: null,
       isActive: "All",
       page: 1
@@ -71,26 +73,27 @@ export default {
     this.getData()
   },
   methods: {
-    getData () {
+    async getData () {
       const query = {}
       if ( this.itemPerPage ) query.itemPerPage = this.itemPerPage
       if ( this.name ) query.name = this.name
       if ( this.isActive ) query.isActive = this.isActive
       if ( this.page ) query.page = this.page
 
-      axios
-        .get( projectService + 'admin/list-lecturer', {
-          params: query
+      await API
+        .get( 'etapens', '/admin/list-lecturer', {
+          queryStringParameters: query,
         } )
-        .then( response => {
-          this.data = response.data.data
-        } )
+        .then( result => {
+          this.data = result.data
+          this.totalPage = result.totalPage
+        } ).catch( error => console.log(error))
     },
-    activate ( id ) {
-      axios.patch( projectService + 'admin/activate-lecturer', {
-        id: id
+    async activate ( id ) {
+      await API.patch( 'etapens', '/admin/activate-lecturer', {
+        body: { id: id }
       } )
-        .then( ( response ) => { if ( response.data == "OK" ) this.getData() } )
+        .then( ( result ) => { if ( result == "OK" ) this.getData() } )
         .catch( function ( error ) {
           console.log( error )
         } )

@@ -20,8 +20,8 @@
             <dt class="text-lg font-medium">Daftar Bimbingan Tugas Akhir</dt>
             <dd class=" text-gray-900 mt-0 col-span-2">
                 <ul role="list" class="border border-gray-200 rounded-md divide-y divide-gray-200">
-                    <li class="pl-3 pr-4 py-3 flex items-center justify-between " v-for=" project  in lecturer.project"
-                        :key=" project ">
+                    <li class="pl-3 pr-4 py-3 flex items-center justify-between "
+                        v-for="   project    in lecturer.project" :key=" project ">
                         <div class="w-0 flex-1 flex items-center">
                             <router-link :to=" { name: 'Project', params: { title: project.title } } ">
                                 <span class="ml-2 flex-1 w-0 truncate text-black">
@@ -37,8 +37,7 @@
     </div>
 </template>
 <script>
-import axios from 'axios'
-import { projectService } from '../../constant/endpoint'
+import { API } from 'aws-amplify'
 import useAuthStore from '../../stores/auth'
 
 export default {
@@ -48,10 +47,10 @@ export default {
             store: useAuthStore()
         }
     },
-    beforeMount () {
-        axios
-            .get( projectService + 'lecturer', { params: { id: this.store.user.lecturerAccount.id } } ) // 21 this.store.user.lecturerAccount.id
-            .then( response => this.lecturer = response.data )
+    async beforeMount () {
+        await API
+            .get( 'etapens', '/lecturer', { queryStringParameters: { id: this.store.user.lecturerAccount.id } } ) // 21 this.store.user.lecturerAccount.id
+            .then( result => this.lecturer = result )
         console.log( this.lecturer )
     }
 }

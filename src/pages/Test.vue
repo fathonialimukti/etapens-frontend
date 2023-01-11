@@ -1,5 +1,5 @@
 <template>
-    <input type="file" @change="anal" accept=".zip" >
+    <input type="file" @change="test">
     <!-- <button @click="getData">getdata</button>
     <div>
         <p>{{newData}}</p>
@@ -16,7 +16,7 @@ export default {
         async getData () {
             this.$router.push( { name: 'Student Dashboard' } )
         },
-        async anal ( e ) {
+        async test ( e ) {
             const files = e.target.files
             for ( const file of files ) {
                 file.path = file.webkitRelativePath.split( "/" )

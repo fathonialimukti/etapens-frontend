@@ -9,7 +9,8 @@
       "UnauthRoleName": "amplify-etapensfrontend-dev-140101-unauthRole",
       "StackName": "amplify-etapensfrontend-dev-140101",
       "StackId": "arn:aws:cloudformation:ap-southeast-1:307987470643:stack/amplify-etapensfrontend-dev-140101/a8dea1f0-371f-11ed-ae64-0a9d48524ba6",
-      "AmplifyAppId": "dp8k9ughe76i4"
+      "AmplifyAppId": "dp8k9ughe76i4",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-etapensfrontend-dev-140101-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {

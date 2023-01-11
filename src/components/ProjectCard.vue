@@ -1,6 +1,6 @@
 <template>
   <v-card @click=" $router.push( { name: 'Project', params: { title: project.title } } )">
-    <v-img :src="project.images[0]" height="200px" cover></v-img>
+    <!-- <v-img :src="project.images[0]" height="200"></v-img> -->
 
     <v-card-text>
       {{project.title}}

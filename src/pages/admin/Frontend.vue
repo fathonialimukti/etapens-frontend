@@ -25,8 +25,9 @@
                 </th>
             </tr>
         </thead>
+    <p>{{ error }}</p>
         <tbody>
-            <tr v-for="     project     in data" :key=" project.id ">
+            <tr v-for="project in data" :key=" project.id ">
                 <td>
                     <router-link :to=" { name: 'Project', params: { title: project.title } } "
                         class="flex flex-wrap font-bold " target="_blank">
@@ -67,7 +68,7 @@
 
                         <v-list v-else>
                             <v-list-item v-if=" !project.isActive && project.type == 'Generals' "
-                                @click=" activate( project ) ">
+                                @click=" activate( project.id, null ) ">
                                 <v-icon icon="mdi-bookmark-check-outline"></v-icon> Activate
                             </v-list-item>
 
@@ -98,8 +99,8 @@
 </template>
 
 <script>
-import axios from "axios"
-import { controlService, projectService } from "../../constant/endpoint"
+
+import { API } from "aws-amplify"
 
 export default {
     data () {
@@ -126,15 +127,13 @@ export default {
             if ( this.title ) query.title = this.title
             if ( this.isActive ) query.isActive = this.isActive
 
-            await axios.get( projectService + 'admin/list-project', {
-                params: query
+            await API.get( 'etapens', '/admin/list-project', {
+                queryStringParameters: query
             } )
-                .then( ( response ) => {
-                    this.data = response.data.data
-                    this.totalPage = response.data.totalPage
-                } ).catch( ( response ) => {
-                    this.error = response.data
-                } )
+                .then( result => {
+                    this.data = result.data
+                    this.totalPage = result.totalPage
+                } ).catch( error => this.error = error )
             this.loading = false
         },
 
@@ -143,30 +142,34 @@ export default {
             this.error = null
 
             if ( project.type == 'NodeJs' ) {
-                await axios.post( controlService + 'frontend/create-nodejs', {
-                    id: project.id,
-                    username: project.student.user.username,
-                    sourceCode: project.sourceCode,
-                    runtimeVersion: project.runtimeVersion
+                await API.post( 'etapens', '/frontend/create-nodejs', {
+                    body: {
+                        id: project.id,
+                        username: project.student.user.username,
+                        sourceCode: project.sourceCode,
+                        runtimeVersion: project.runtimeVersion
+}
                 } )
-                    .then( ( response ) => {
-                        this.activate( project.id, response.data.url )
+                    .then( ( result ) => {
+                        this.activate( project.id, result.url )
                     } )
-                    .catch( ( response ) => {
-                        this.error = response.data
+                    .catch( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
             } else if ( project.type == 'WebStatic' ) {
-                await axios.post( controlService + 'frontend/create-webstatic', {
-                    id: project.id,
-                    username: project.student.user.username,
-                    sourceCode: project.sourceCode,
+                await API.post( 'etapens', '/frontend/create-webstatic', {
+                    body: {
+                        id: project.id,
+                        username: project.student.user.username,
+                        sourceCode: project.sourceCode,
+}
                 } )
-                    .then( ( response ) => {
-                        this.activate( project.id, response.data.url )
+                    .then( ( result ) => {
+                        this.activate( project.id, result.url )
                     } )
-                    .catch( ( response ) => {
-                        this.error = response.data
+                    .catch( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
             } else { this.error = "App type is missing" }
@@ -174,12 +177,14 @@ export default {
 
         async activate ( id, url ) {
             this.loading = true
-            await axios.patch( projectService + 'admin/activate-project', {
-                id: id,
-                url: url
+            await API.patch( 'etapens', '/admin/activate-project', {
+                body: {
+                    id: id,
+                    url: url
+                }
             } ).then( () => this.getData() )
-                .catch( ( response ) => {
-                    this.error = response.data
+                .catch( ( result ) => {
+                    this.error = result
                 } )
             this.loading = false
         },
@@ -189,30 +194,34 @@ export default {
             this.error = null
 
             if ( project.type == 'NodeJs' ) {
-                await axios.post( controlService + 'frontend/start-nodejs', {
-                    id: project.id,
-                    username: project.student.user.username,
-                    runtimeVersion: project.runtimeVersion
+                await API.post( 'etapens', '/frontend/start-nodejs', {
+                    body: {
+                        id: project.id,
+                        username: project.student.user.username,
+                        runtimeVersion: project.runtimeVersion
+                    }
                 } )
-                    .then( ( response ) => {
-                        this.error = response.data
+                    .then( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
-                    .catch( ( response ) => {
-                        this.error = response.data
+                    .catch( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
             } else if ( project.type == 'WebStatic' ) {
-                await axios.post( controlService + 'frontend/start-webstatic', {
-                    id: project.id,
-                    username: project.student.user.username,
+                await API.post( 'etapens', '/frontend/start-webstatic', {
+                    body: {
+                        id: project.id,
+                        username: project.student.user.username,
+                    }
                 } )
-                    .then( ( response ) => {
-                        this.error = response.data
+                    .then( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
-                    .catch( ( response ) => {
-                        this.error = response.data
+                    .catch( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
             } else { this.error = "App type is missing" }
@@ -223,32 +232,36 @@ export default {
             this.error = null
 
             if ( project.type == 'NodeJs' ) {
-                await axios.post( controlService + 'frontend/update-nodejs', {
-                    id: project.id,
-                    username: project.student.user.username,
-                    sourceCode: project.sourceCode,
-                    runtimeVersion: project.runtimeVersion
+                await API.post( 'etapens', '/frontend/update-nodejs', {
+                    body: {
+                        id: project.id,
+                        username: project.student.user.username,
+                        sourceCode: project.sourceCode,
+                        runtimeVersion: project.runtimeVersion
+                    }
                 } )
-                    .then( ( response ) => {
-                        this.error = response.data
+                    .then( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
-                    .catch( ( response ) => {
-                        this.error = response.data
+                    .catch( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
             } else if ( project.type == 'WebStatic' ) {
-                await axios.post( controlService + 'frontend/update-webstatic', {
-                    id: project.id,
-                    username: project.student.user.username,
-                    sourceCode: project.sourceCode,
+                await API.post( 'etapens', '/frontend/update-webstatic', {
+                    body: {
+                        id: project.id,
+                        username: project.student.user.username,
+                        sourceCode: project.sourceCode,
+                    }
                 } )
-                    .then( ( response ) => {
-                        this.error = response.data
+                    .then( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
-                    .catch( ( response ) => {
-                        this.error = response.data
+                    .catch( ( result ) => {
+                        this.error = result
                         this.loading = false
                     } )
             } else { this.error = "App type is missing" }
@@ -256,15 +269,17 @@ export default {
 
         async stop ( project ) {
             this.loading = true
-            await axios.post( controlService + 'frontend/stop', {
-                id: project.id,
+            await API.post( 'etapens', '/frontend/stop', {
+                body: {
+                    id: project.id,
+                }
             } )
-                .then( ( response ) => {
-                    this.error = response.data
+                .then( ( result ) => {
+                    this.error = result
                     this.loading = false
                 } )
-                .catch( ( response ) => {
-                    this.error = response.data
+                .catch( ( result ) => {
+                    this.error = result
                 } )
             this.loading = false
         }

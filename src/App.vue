@@ -1,8 +1,40 @@
 <script setup>
-import { Amplify } from 'aws-amplify';
-import awsconfig from './aws-exports.js';
+import { Amplify, Auth } from 'aws-amplify'
+// import awsconfig from './aws-exports.js'
 
-Amplify.configure( awsconfig );
+Amplify.configure( {
+  // ...awsconfig,
+  Auth: {
+    identityPoolId: 'ap-southeast-1:15232557-2332-448b-87a5-bf7ddb8b5ca5',
+    region: 'ap-southeast-1',
+    userPoolId: 'ap-southeast-1_6Vsn41RIq',
+    userPoolWebClientId: '3ac8lj16iaku2a8n5cnbg4to1j',
+  },
+
+  Storage: {
+    AWSS3: {
+      bucket: 'pjj2022-fathoni-etapens-storage', //REQUIRED -  Amazon S3 bucket name
+      region: 'ap-southeast-3', //OPTIONAL -  Amazon service region
+    }
+  },
+
+  API: {
+    endpoints: [ {
+      name: 'etapens',
+      endpoint: "https://6zbrs7idyb.execute-api.ap-southeast-3.amazonaws.com/prod",
+      region: 'ap-southeast-3',
+      custom_header: async () => {
+        try {
+          return {
+            Authorization: `Bearer ${ ( await Auth.currentSession() ).getIdToken().getJwtToken() }`
+          }
+        } catch ( error ) {
+          console.log(error);
+        }
+      }
+    } ]
+  }
+} )
 </script>
 
 <template>

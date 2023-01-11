@@ -12,8 +12,7 @@
 <script>
 import ProjectCard from "../components/ProjectCard.vue"
 import Search from "../components/Search.vue"
-import axios from "axios"
-import { projectService } from "../constant/endpoint"
+import { API } from "aws-amplify"
 
 export default {
   components: {
@@ -31,7 +30,7 @@ export default {
     this.getData()
   },
   methods: {
-    getData ( searchQuery ) {
+    async getData ( searchQuery ) {
       const query = {}
       if ( this.page < 1 || this.page > this.totalPage ) this.page = 1
       query.page = this.page
@@ -43,14 +42,14 @@ export default {
         if ( searchQuery.method.length != 0 ) query.method = this.method
       }
 
-      axios
-        .get( projectService, {
-          params: query
+      await API
+        .get( 'etapens', '/', {
+          queryStringParameters: query
         } )
-        .then( response => {
-          this.projects = response.data.data
-          this.totalPage = response.data.totalPage
-        } )
+        .then( result => {
+          this.projects = result.data
+          this.totalPage = result.totalPage
+        } ).catch(error => console.log(error))
     }
   }
 };

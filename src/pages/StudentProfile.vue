@@ -28,8 +28,8 @@
     </div>
 </template>
 <script>
-import axios from 'axios'
-import { projectService } from '../constant/endpoint'
+import { API } from 'aws-amplify'
+
 
 export default {
     data () {
@@ -37,10 +37,12 @@ export default {
             student: null
         }
     },
-    beforeMount () {
-        axios
-            .get( projectService + 'get-student-profile', { params: { studentName: this.$route.params.name } } )
-            .then( response => this.student = response.data )
+    async beforeMount () {
+        await API
+            .get( 'etapens', '/get-student-profile', {
+                queryStringParameters: { studentName: this.$route.params.name }
+            } )
+            .then( result => this.student = result )
     }
 }
 </script>

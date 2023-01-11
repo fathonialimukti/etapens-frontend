@@ -5,7 +5,7 @@
         <v-text-field v-model=" email " label="Email" class="md:col-span-5" @input=" getData "
             prepend-inner-icon="mdi-book-search-outline" />
     </div>
-    <v-card-title>Total User: {{totalUser}}</v-card-title>
+    <v-card-title>Total User: {{ totalUser }}</v-card-title>
     <v-table fixed-header>
         <thead>
             <tr>
@@ -23,9 +23,9 @@
                 </th>
             </tr>
         </thead>
-        <p>{{error}}</p>
+        <p>{{ error }}</p>
         <tbody>
-            <tr v-for=" user in data" :key=" user.id ">
+            <tr v-for="    user    in data" :key=" user.id ">
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.role }}</td>
@@ -56,8 +56,7 @@
 </template>
 
 <script>
-import axios from "axios"
-import { projectService } from "../../constant/endpoint"
+import { API } from "aws-amplify"
 
 export default {
     data () {
@@ -77,29 +76,29 @@ export default {
         this.getData()
     },
     methods: {
-        getData () {
+        async getData () {
             const query = {}
             if ( this.itemPerPage ) query.itemPerPage = this.itemPerPage
             if ( this.email ) query.email = this.email
             if ( this.page ) query.page = this.page
 
-            axios
-                .get( projectService + 'admin/list-user', {
-                    params: query
-                } )
-                .then( response => {
-                    this.data = response.data.data
-                    this.totalUser = response.data.totalUser
-                    this.totalPage = response.data.totalPage
-                } )
+            await API.get( 'etapens', '/admin/list-user', {
+                queryStringParameters: query
+            } )
+                .then( result => {
+                    this.data = result.data
+                    this.totalUser = result.totalUser
+                    this.totalPage = result.totalPage
+                } ).catch( error => console.log( error ) )
         },
-        grantAdmin ( id ) {
-            axios.patch( projectService + 'admin/grant-admin', {
-                id: id
+        async grantAdmin ( id ) {
+            await API.patch( 'etapens', '/admin/grant-admin', {
+                body: {id: id}
             } )
                 .then( () => this.getData() )
-                .catch( ( response ) => {
-                    this.error = response.data.message
+                .catch( ( result ) => {
+                    console.log(result);
+                    this.error = result.message
                 } )
         }
     },

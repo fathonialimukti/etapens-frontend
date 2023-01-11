@@ -19,8 +19,9 @@
                 </th>
             </tr>
         </thead>
+    <p>{{ error }}</p>
         <tbody>
-            <tr v-for=" tech in data" :key=" tech.id ">
+            <tr v-for="      tech      in data" :key=" tech.id ">
                 <td>
                     {{ tech.name }}
                 </td>
@@ -28,7 +29,7 @@
                     <v-tooltip text="Delete">
                         <template v-slot:activator=" { props } ">
                             <v-btn v-bind=" props " color="error" icon="mdi-delete-alert-outline" size="small"
-                                @click=" deleteTech( tech.id ) " :loading="loading" :disabled="loading"></v-btn>
+                                @click=" deleteTech( tech.id ) " :loading=" loading " :disabled=" loading "></v-btn>
                         </template>
                     </v-tooltip>
                 </td>
@@ -40,7 +41,8 @@
             <v-row justify="center">
                 <v-col cols="8">
                     <v-container class="max-width">
-                        <v-pagination v-model=" page " class="my-4" :length=" totalPage " @click=" getData "></v-pagination>
+                        <v-pagination v-model=" page " class="my-4" :length=" totalPage "
+                            @click=" getData "></v-pagination>
                     </v-container>
                 </v-col>
             </v-row>
@@ -49,7 +51,8 @@
 </template>
 
 <script>
-import axios from "axios"
+
+import { API } from "aws-amplify"
 import { projectService } from "../../constant/endpoint"
 
 export default {
@@ -69,30 +72,30 @@ export default {
         this.getData()
     },
     methods: {
-        getData () {
+        async getData () {
             const query = {}
             if ( this.itemPerPage ) query.itemPerPage = this.itemPerPage
             if ( this.searchName ) query.name = this.searchName
             if ( this.page ) query.page = this.page
 
-            axios.get( projectService + 'admin/list-research-method', {
-                params: query
-            } ).then( response => {
-                this.data = response.data.data
-                this.totalPage = response.data.totalPage
+            await API.get( 'etapens', '/admin/list-research-method', {
+                queryStringParameters: query
+            } ).then( result => {
+                this.data = result.data
+                this.totalPage = result.totalPage
             } )
         },
-        create () {
-            axios.post( projectService + 'admin/create-research-method', {
-                name: this.createNewTech
+        async create () {
+            await API.post( 'etapens', '/admin/create-research-method', {
+                body: { name: this.createNewTech }
             } ).then( () => this.getData() )
                 .catch( ( error ) => {
                     this.error = error
                 } )
         },
-        deleteTech ( id ) {
-            axios.delete( projectService + 'admin/delete-research-method', {
-                data: { id: id }
+        async deleteTech ( id ) {
+            await API.del( 'etapens', '/admin/delete-research-method', {
+                body: { id: id }
             } ).then( () => this.getData() )
                 .catch( ( error ) => {
                     this.error = error

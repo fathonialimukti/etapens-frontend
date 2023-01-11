@@ -6,10 +6,10 @@
         <v-text-field v-model=" database.username " label="Database user name" required
             :rules=" [ v => !!v || 'Name is required',v => (v || '').indexOf(' ') < 0 || 'No spaces are allowed' ] ">
         </v-text-field>
-        <v-text-field v-model=" database.password " label="Database user password" required
-            :rules=" [ v => v.match( /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/ ) || 'a password between 8 to 15 characters which contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special' ] ">
-        </v-text-field>
-        <v-textarea v-model=" database.description " label="Description" required
+        <v-text-field v-model=" database.password " label="Database user password" required />
+            <!-- :rules=" [ v => v.match( /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/ ) || 'a password between 8 to 15 characters which contain at least one lowercase letter, one uppercase letter, one numeric digit, and one special' ] "> -->
+
+            <v-textarea v-model=" database.description " label="Description" required
             :rules=" [ v => !!v || 'Description is required' ] "></v-textarea>
 
         <v-select v-model=" database.type " :items=" dbList " :rules=" [ v => !!v || 'Database type is required' ] "
@@ -25,8 +25,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { projectService } from '../../constant/endpoint'
+import { API } from 'aws-amplify'
 import useAuthStore from '../../stores/auth'
 
 const store = useAuthStore()
@@ -62,12 +61,12 @@ export default {
 
         async submit () {
             this.loading = true
-            await axios.post(
-                projectService + "student/database",
-                this.database,
+            await API.post(
+                'etapens', "/student/database",
+                { body: this.database }
             )
-                .catch( ( response ) => {
-                    this.error = response.message
+                .catch( ( result ) => {
+                    this.error = result.message
                 } )
 
             if ( this.error ) {

@@ -19,8 +19,9 @@
                 </th>
             </tr>
         </thead>
+    <p>{{ error }}</p>
         <tbody>
-            <tr v-for=" researchField in data" :key=" researchField.id ">
+            <tr v-for="      researchField      in data" :key=" researchField.id ">
                 <td>
                     {{ researchField.name }}
                 </td>
@@ -28,7 +29,8 @@
                     <v-tooltip text="Delete">
                         <template v-slot:activator=" { props } ">
                             <v-btn v-bind=" props " color="error" icon="mdi-delete-alert-outline" size="small"
-                                @click=" deleteTech( researchField.id ) " :loading="loading" :disabled="loading"></v-btn>
+                                @click=" deleteTech( researchField.id ) " :loading=" loading "
+                                :disabled=" loading "></v-btn>
                         </template>
                     </v-tooltip>
                 </td>
@@ -50,8 +52,8 @@
 </template>
 
 <script>
-import axios from "axios"
-import { projectService } from "../../constant/endpoint"
+
+import { API } from "aws-amplify"
 
 export default {
     data () {
@@ -70,30 +72,30 @@ export default {
         this.getData()
     },
     methods: {
-        getData () {
+        async getData () {
             const query = {}
             if ( this.itemPerPage ) query.itemPerPage = this.itemPerPage
             if ( this.searchName ) query.name = this.searchName
             if ( this.page ) query.page = this.page
 
-            axios.get( projectService + 'admin/list-research-field', {
-                params: query
-            } ).then( response => {
-                this.data = response.data.data
-                this.totalPage = response.data.totalPage
+            await API.get( 'etapens', '/admin/list-research-field', {
+                queryStringParameters: query
+            } ).then( result => {
+                this.data = result.data
+                this.totalPage = result.totalPage
             } )
         },
-        create () {
-            axios.post( projectService + 'admin/create-research-field', {
-                name: this.createNewTech
+        async create () {
+            await API.post( 'etapens', '/admin/create-research-field', {
+                body: { name: this.createNewTech }
             } ).then( () => this.getData() )
                 .catch( ( error ) => {
                     this.error = error
                 } )
         },
-        deleteTech ( id ) {
-            axios.delete( projectService + 'admin/delete-research-field', {
-                data: { id: id }
+        async deleteTech ( id ) {
+            await API.del( 'etapens', '/admin/delete-research-field', {
+                body: { id: id }
             } ).then( () => this.getData() )
                 .catch( ( error ) => {
                     this.error = error

@@ -29,8 +29,9 @@
         </th>
       </tr>
     </thead>
+    <p>{{ error }}</p>
     <tbody>
-      <tr v-for="   backend   in data" :key=" backend.id ">
+      <tr v-for="backend in data" :key=" backend.id ">
         <td>{{ backend.student.name }}</td>
         <td> {{ backend.description }} </td>
         <td>
@@ -88,8 +89,7 @@
 </template>
 
 <script>
-import axios from "axios"
-import { controlService, projectService } from "../../constant/endpoint"
+import { API } from "aws-amplify"
 
 export default {
   data () {
@@ -116,14 +116,17 @@ export default {
       if ( this.name ) query.name = this.name
       if ( this.isActive ) query.isActive = this.isActive
 
-      axios.get( projectService + 'admin/list-backend', {
-        params: query
+      await API.get( 'etapens', '/admin/list-backend', {
+        queryStringParameters: query
       } )
-        .then( ( response ) => {
-          console.log( response )
-          this.data = response.data.data
-          this.totalPage = response.data.totalPage
+        .then( result => {
+          this.data = result.data
+          this.totalPage = result.totalPage
         } )
+        .catch(
+          error => this.error = error
+        )
+
       this.loading = false
     },
 
@@ -131,17 +134,19 @@ export default {
       this.loading = true
       this.error = null
 
-      await axios.post( controlService + 'backend/create', {
-        username: backend.student.user.username,
-        sourceCode: backend.sourceCode,
-        id: backend.id,
-        runtimeVersion: backend.runtimeVersion
+      await API.post( 'etapens', '/backend/create', {
+        body: {
+          username: backend.student.user.username,
+          sourceCode: backend.sourceCode,
+          id: backend.id,
+          runtimeVersion: backend.runtimeVersion
+        }
       } )
-        .then( ( response ) => {
-          this.activate( backend.id, response.data.url )
+        .then( ( result ) => {
+          this.activate( backend.id, result.url )
         } )
-        .catch( ( response ) => {
-          this.error = response.data
+        .catch( ( result ) => {
+          this.error = result
           this.loading = false
         } )
     },
@@ -150,28 +155,32 @@ export default {
       this.loading = true
       this.error = null
 
-      await axios.post( controlService + 'backend/update', {
-        username: backend.student.user.username,
-        sourceCode: backend.sourceCode,
-        id: backend.id,
-        runtimeVersion: backend.runtimeVersion
+      await API.post( 'etapens', '/backend/update', {
+        body: {
+          username: backend.student.user.username,
+          sourceCode: backend.sourceCode,
+          id: backend.id,
+          runtimeVersion: backend.runtimeVersion
+        }
       } )
-        .then( ( response ) => {
-          this.activate( backend.id, response.data.url )
+        .then( ( result ) => {
+          this.activate( backend.id, result.url )
         } )
-        .catch( ( response ) => {
-          this.error = response.data
+        .catch( ( result ) => {
+          this.error = result
           this.loading = false
         } )
     },
 
     async activate ( id, url ) {
-      await axios.patch( projectService + 'admin/activate-backend', {
-        id: id,
-        url: url
+      await API.patch( 'etapens', '/admin/activate-backend', {
+        body: {
+          id: id,
+          url: url
+        }
       } ).then( () => this.getData() )
-        .catch( ( response ) => {
-          this.error = response.data
+        .catch( ( result ) => {
+          this.error = result
         } )
       this.loading = false
     },
@@ -180,17 +189,19 @@ export default {
       this.loading = true
       this.error = null
 
-      await axios.post( controlService + 'backend/start', {
-        username: backend.student.user.username,
-        id: backend.id,
-        runtimeVersion: backend.runtimeVersion
+      await API.post( 'etapens', '/backend/start', {
+        body: {
+          username: backend.student.user.username,
+          id: backend.id,
+          runtimeVersion: backend.runtimeVersion
+        }
       } )
-        .then( ( response ) => {
-          this.error = response.data
+        .then( ( result ) => {
+          this.error = result
           this.loading = false
         } )
-        .catch( ( response ) => {
-          this.error = response.data
+        .catch( ( result ) => {
+          this.error = result
           this.loading = false
         } )
     },
@@ -199,15 +210,15 @@ export default {
       this.loading = true
       this.error = null
 
-      await axios.post( controlService + 'backend/stop', {
-        id: backend.id,
+      await API.post( 'etapens', '/backend/stop', {
+        body: { id: backend.id }
       } )
-        .then( ( response ) => {
-          this.error = response.data
+        .then( ( result ) => {
+          this.error = result
           this.loading = false
         } )
-        .catch( ( response ) => {
-          this.error = response.data
+        .catch( ( result ) => {
+          this.error = result
           this.loading = false
         } )
     },

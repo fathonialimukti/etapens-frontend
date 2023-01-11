@@ -8,19 +8,19 @@
         <v-card-text>
             <v-window v-model=" tab ">
                 <v-window-item value="Mahasiswa">
-                    <v-form ref="form" v-model=" valid " lazy-validation>
-                        <v-text-field v-model=" newStudent.name " :rules=" [ v => !!v || 'Name is required' ] " label="Nama"
-                            required color="secondary" bg-color="amber-lighten-4"></v-text-field>
+                    <v-form ref="form">
+                        <v-text-field v-model=" newStudent.name " :rules=" [ v => !!v || 'Name is required' ] "
+                            label="Nama" required color="secondary"></v-text-field>
 
-                        <v-text-field v-model=" newStudent.nrp " :rules=" [ v => !!v || 'Nrp is required' ] " label="NRP"
-                            type="number" required color="secondary" bg-color="amber-lighten-4"></v-text-field>
+                        <v-text-field v-model=" newStudent.nrp " :rules=" [ v => !!v || 'Nrp is required' ] "
+                            label="NRP" type="number" required color="secondary"></v-text-field>
 
                         <v-textarea v-model=" newStudent.bio " :rules=" [ v => !!v || 'Bio is required' ] " label="Bio"
-                            required color="secondary" bg-color="amber-lighten-4">
+                            required color="secondary">
                         </v-textarea>
 
-                        <v-file-input v-model=" newStudent.image " label="Image" variant="filled"
-                            prepend-icon="mdi-camera" color="secondary" bg-color="amber-lighten-4"></v-file-input>
+                        <v-file-input v-model=" imageFile " label="Image" variant="filled" prepend-icon="mdi-camera"
+                            color="secondary" accept="image/*" show-size></v-file-input>
 
                         <v-btn color="success" class="mr-4" @click=" submitMahasiswa ">
                             Submit
@@ -29,19 +29,20 @@
                 </v-window-item>
 
                 <v-window-item value="Dosen">
-                    <v-form ref="form" v-model=" valid " lazy-validation>
-                        <v-text-field v-model=" newLecturer.name " :rules=" [ v => !!v || 'Name is required' ] " label="Nama" required
-                            color="secondary" bg-color="amber-lighten-4"></v-text-field>
-                    
-                        <v-text-field v-model=" newLecturer.nip " :rules=" [ v => !!v || 'Nip is required' ] " label="Nip" type="number"
-                            required color="secondary" bg-color="amber-lighten-4"></v-text-field>
-                    
-                        <v-textarea v-model=" newLecturer.bio " :rules=" [ v => !!v || 'Bio is required' ] " label="Bio" required
-                            color="secondary" bg-color="amber-lighten-4">
+                    <v-form ref="form">
+                        <v-text-field v-model=" newLecturer.name " :rules=" [ v => !!v || 'Name is required' ] "
+                            label="Nama" required color="secondary"></v-text-field>
+
+                        <v-text-field v-model=" newLecturer.nip " :rules=" [ v => !!v || 'Nip is required' ] "
+                            label="Nip" type="number" required color="secondary"></v-text-field>
+
+                        <v-textarea v-model=" newLecturer.bio " :rules=" [ v => !!v || 'Bio is required' ] " label="Bio"
+                            required color="secondary">
                         </v-textarea>
-                    
-                        <v-file-input v-model=" newLecturer.image " label="Image" variant="filled" prepend-icon="mdi-camera" color="secondary" bg-color="amber-lighten-4"></v-file-input>
-                    
+
+                        <v-file-input v-model=" imageFile " label="Image" variant="filled" prepend-icon="mdi-camera"
+                            color="secondary" accept="image/*"></v-file-input>
+
                         <v-btn color="success" class="mr-4" @click=" submitDosen ">
                             Submit
                         </v-btn>
@@ -49,17 +50,17 @@
                 </v-window-item>
             </v-window>
         </v-card-text>
+        <v-card-text>{{ status }}</v-card-text>
     </v-card>
 </template>
 
 <script>
 import useAuthStore from '../stores/auth'
-import { Storage } from 'aws-amplify'
-import axios from 'axios'
-import { projectService } from '../constant/endpoint'
+import { API, Storage, Auth } from 'aws-amplify'
 
 const store = useAuthStore()
-const baseUrl = "https://etapens-storage140101-dev.s3.ap-southeast-1.amazonaws.com/public/"
+const baseUrl = 'https://pjj2022-fathoni-etapens-storage.s3.ap-southeast-1.amazonaws.com/public/'
+
 
 export default {
     data () {
@@ -70,54 +71,51 @@ export default {
                 name: null,
                 nrp: null,
                 bio: null,
-                image: [],
+                image: baseUrl + store.user.username + '/profile.png',
                 userId: store.user.id
             },
             newLecturer: {
                 name: null,
                 nip: null,
                 bio: null,
-                image: [],
+                image: baseUrl + store.user.username + '/profile.png',
                 userId: store.user.id
-            }
+            },
+            imageFile: null
         }
     },
     methods: {
         async submitMahasiswa () {
-            const { valid } = await this.$refs.form.validate()
+            await this.upload()
+            // const { valid } = await this.$refs.form.validate()
 
-            if ( !valid ) return
+            // if ( !valid ) return
 
-            await this.upload( this.newStudent.image[ 0 ] )
-
-            this.newStudent.image = baseUrl + store.user.username + '/profile.png'
-
-            await axios( {
-                method: "post",
-                url: projectService + "student/create",
-                data: this.newStudent,
-                headers: { "Content-Type": "application/json" },
-            } )
-                .then( ( response ) => {
-                    this.status = response.message
-                } )
-                .catch( ( response ) => {
-                    this.status = response.message
-                } )
-
-            this.$router.push( { name: 'Home' } )
+            // await API.post( 'etapens', '/student/create', {
+            //     body: this.newStudent
+            // } )
+            //     .then( async () => {
+            //         console.log( "Success" );
+            //         await this.upload()
+            //     } )
+            //     .catch( ( result ) => {
+            //         console.log( "Error" );
+            //         this.status = result.message
+            //     } )
         },
-        async upload ( image ) {
+        async upload () {
+            const image = this.imageFile[ 0 ]
             await Storage.put( `${ store.user.username }/profile.png`, image, {
-                acl: "public-read",
+                acl: 'public-read',
                 progressCallback: ( progress ) => {
                     this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
                 },
                 errorCallback: ( err ) => {
                     this.status = 'Unexpected error while uploading' + err
                 },
-                completeCallback: ( event ) => {
+                completeCallback: async ( event ) => {
                     this.status = `Successfully uploaded ${ event.key }`
+                    await this.setAuth()
                 },
             } )
         },
@@ -125,24 +123,30 @@ export default {
             const { valid } = await this.$refs.form.validate()
 
             if ( !valid ) return
-            await this.upload( this.newLecturer.image[ 0 ] )
 
-            this.newLecturer.image = baseUrl + store.user.username + '/profile.png'
-
-            await axios( {
-                method: "post",
-                url: projectService + "lecturer/create",
-                data: this.newLecturer,
-                headers: { "Content-Type": "application/json" },
+            await API.post( 'etapens', '/lecturer/create', {
+                body: this.newLecturer,
             } )
-                .then( ( response ) => {
-                    this.status = response.message
+                .then( async () => {
+                    await this.upload()
+                } )
+                .catch( ( result ) => {
+                    this.status = result.message
+                } )
+        },
+        async setAuth () {
+            await API
+                .post( 'etapens', '/get-user', {
+                    body: {
+                        username: store.user.username,
+                        email: store.user.email
+                    }
+                } )
+                .then( result => {
+                    store.setUser( result )
+
                     this.$router.push( { name: 'Home' } )
                 } )
-                .catch( ( response ) => {
-                    this.status = response.message
-                } )
-
         },
     }
 }

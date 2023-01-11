@@ -1,14 +1,26 @@
 <template>
-    <authenticator>
+    <authenticator :sign-up-attributes="['email']">
+        <template v-slot=" { user, signOut } ">
+            <div class="text-center">
+                <div>
+                    <h1>Hello {{ user.username }}!</h1>
+                </div>
+                <div class="m-5">
+                    <v-btn @click=" $router.push( { name: 'Home' } ) ">Kembali</v-btn>
+                </div>
+                <div>
+                    <v-btn @click=" signOut ">Sign Out</v-btn>
+                </div>
+            </div>
+        </template>
     </authenticator>
 </template>
 
 <script>
 import { Authenticator, useAuthenticator } from "@aws-amplify/ui-vue"
-import axios from "axios"
 import useAuthStore from "../stores/auth"
 import "@aws-amplify/ui-vue/styles.css"
-import { projectService } from "../constant/endpoint"
+import { API } from "aws-amplify"
 
 
 const auth = useAuthenticator()
@@ -27,14 +39,15 @@ export default {
         },
     },
     methods: {
-        setAuth () {
-            axios
-                .post( projectService + 'get-user', {
-                    username: this.auth.user.username,
-                    email: this.auth.user.attributes.email
+        async setAuth () {
+            await API
+                .post( 'etapens', '/get-user', {
+                    body: {
+                        username: this.auth.user.username,
+                        email: this.auth.user.attributes.email }
                 } )
-                .then( ( response ) => {
-                    this.store.setUser( response.data )
+                .then( result => {
+                    this.store.setUser( result )
                     // activate this on production
                     // this.$router.push( { name: 'Home' } ) 
                 } )

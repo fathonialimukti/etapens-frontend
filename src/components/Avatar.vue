@@ -6,7 +6,7 @@
                     <v-img v-if=" store.user.studentAccount?.image || store.user.lecturerAccount?.image "
                         :src=" store.user.studentAccount?.image || store.user.lecturerAccount?.image "
                         :alt=" store.user.username "></v-img>
-                    <span v-else class="text-h5">{{ store.user.username[0] }}</span>
+                    <span v-else class="text-h5">{{ store.user.username[ 0 ] }}</span>
                 </v-avatar>
             </v-btn>
         </template>
@@ -17,22 +17,33 @@
                         <v-img v-if=" store.user.studentAccount?.image || store.user.lecturerAccount?.image "
                             :src=" store.user.studentAccount?.image || store.user.lecturerAccount?.image "
                             :alt=" store.user.username "></v-img>
-                        <span v-else class="text-h5">{{ store.user.username[0] }}</span>
+                        <span v-else class="text-h5">{{ store.user.username[ 0 ] }}</span>
                     </v-avatar>
                     <h3>{{ store.user.email }}</h3>
                     <v-divider class="my-3"></v-divider>
 
-                    <v-btn v-if=" store.user.role == 'Admin'" rounded variant="text" @click=" $router.push( { name: 'Admin Dashboard' } ) ">
+                    <v-btn v-if=" store.user.role == 'Admin' " rounded variant="text"
+                        @click=" $router.push( { name: 'Admin Dashboard' } ) ">
                         Dashboard
                     </v-btn>
-                    <v-btn v-else-if=" store.user.role == 'Student' && store.user.studentAccount.isActive " rounded variant="text" @click=" $router.push( { name: 'Student Dashboard' } ) ">
+                    <v-btn v-else-if=" store.user.role == 'Student' && store.user.studentAccount.isActive " rounded
+                        variant="text" @click=" $router.push( { name: 'Student Dashboard' } ) ">
                         Dashboard
                     </v-btn>
-                    <v-btn v-else-if=" store.user.role == 'Lecturer' && store.user.lecturerAccount.isActive " rounded variant="text" @click=" $router.push( { name: 'Lecturer Dashboard' } ) ">
+                    <v-btn v-else-if=" store.user.role == 'Lecturer' && store.user.lecturerAccount.isActive " rounded
+                        variant="text" @click=" $router.push( { name: 'Lecturer Dashboard' } ) ">
                         Dashboard
                     </v-btn>
-                    <v-btn v-else rounded variant="text" color="error" @click=" $router.push( { name: 'Lecturer Dashboard' } ) ">
-                        Inactive
+                    <v-btn v-else-if=" store.user.role == 'Student' && !store.user.studentAccount.isActive " rounded
+                        variant="text" color="warning">
+                        Verifying Student
+                    </v-btn>
+                    <v-btn v-else-if=" store.user.role == 'Lecturer' && !store.user.lecturerAccount.isActive " rounded
+                        variant="text" color="warning">
+                        Verifying Lecturer
+                    </v-btn>
+                    <v-btn v-else rounded variant="text" color="error" @click=" $router.push( { name: 'Register' } ) ">
+                        Register
                     </v-btn>
 
                     <v-divider class="my-3"></v-divider>
@@ -59,6 +70,7 @@ export default {
     },
     methods: {
         signOut () {
+            this.$router.push( { name: 'Login' } )
             this.auth.signOut()
             this.store.deleteUser()
         }

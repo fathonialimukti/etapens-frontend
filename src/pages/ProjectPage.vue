@@ -11,7 +11,7 @@
           </iframe>
         </center>
       </v-carousel-item>
-      <v-carousel-item v-for=" image      in project.images" :src=" image " :key=" image "></v-carousel-item>
+      <v-carousel-item v-for="image in project.images" :src=" image " :key=" image "></v-carousel-item>
     </v-carousel>
 
     <h1 class="font-bold text-2xl mt-5 antialiased md:subpixel-antialiased leading-relaxed">{{ project.title }}</h1>
@@ -96,10 +96,7 @@
 
 <script>
 import useAuthStore from "../stores/auth"
-import { API, Auth } from "aws-amplify"
-
-
-
+import { API } from "aws-amplify"
 
 export default {
   data () {

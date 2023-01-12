@@ -21,7 +21,7 @@
         </thead>
     <p>{{ error }}</p>
         <tbody>
-            <tr v-for="      researchField      in data" :key=" researchField.id ">
+            <tr v-for="researchField in data" :key=" researchField.id ">
                 <td>
                     {{ researchField.name }}
                 </td>

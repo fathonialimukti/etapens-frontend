@@ -139,7 +139,7 @@ export default {
 
 
             // validate project
-            await API.post( 'etapens', "/student/project", {
+            await API.post( 'etapens', '/student/project', {
                 body: project,
             } )
                 .then( ( result ) => {

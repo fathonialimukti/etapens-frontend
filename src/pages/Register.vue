@@ -57,7 +57,7 @@
 <script>
 import { storageUrl } from '../constant/endpoint'
 import useAuthStore from '../stores/auth'
-import { API, Storage, Auth } from 'aws-amplify'
+import { API, Storage } from 'aws-amplify'
 
 const store = useAuthStore()
 

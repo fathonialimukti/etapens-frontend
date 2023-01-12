@@ -22,16 +22,15 @@
         <v-autocomplete v-if=" project.type == 'NodeJs' " label="Versi Node js" v-model=" project.runtimeVersion "
             :items=" [ 16, 18 ] " :rules=" [ v => !!v || 'Node version is Required' ] " prepend-icon="mdi-nodejs" />
 
-        <v-text-field v-if=" project.type == 'NodeJs' || project.type == 'WebStatic' " v-model=" project.sourceCode "
-            label="Source Code" :rules=" [ v => !!v || 'Source Code is Required' ] " prepend-icon="mdi-git" clearable />
+        <v-text-field v-model=" project.sourceCode " label="Source Code" prepend-icon="mdi-git" clearable />
 
         <v-text-field v-if=" project.type == 'SelfHostedWeb' " v-model=" project.url " label="Url Aplikasi"
             :rules=" [ v => !!v || 'Url is Required' ] " prepend-icon="mdi-web" clearable />
 
         <v-autocomplete label="Teknologi yang digunakan" v-model=" project.tech " v-model:search=" search.tech "
-            @input=" findTech " :items=" list.tech " item-title="name" item-value="name" :rules=" [ v => !!v || 'Tech is Required' ] "
-            placeholder="Start typing then enter search" prepend-icon="mdi-tools" multiple chips closable-chips
-            return-object hide-no-data hide-selected />
+            @input=" findTech " :items=" list.tech " item-title="name" item-value="name"
+            :rules=" [ v => !!v || 'Tech is Required' ] " placeholder="Start typing then enter search"
+            prepend-icon="mdi-tools" multiple chips closable-chips return-object hide-no-data hide-selected />
 
         <v-autocomplete label="Metode yang digunakan" v-model=" project.method " v-model:search=" search.method "
             @input=" findMethods " :items=" list.method " item-title="name" item-value="name"
@@ -115,7 +114,7 @@ export default {
         },
         async submit () {
             this.loading = true
-            this.error = false
+            this.error = null
             var project = this.project
             const documents = project.documents
             const images = project.images
@@ -169,7 +168,7 @@ export default {
                     project.images.push( storageUrl + `${ store.user.username }/images/${ image.name.replace( / /g, "+" ) }` )
                 } catch ( error ) {
                     this.status = 'Unexpected error while uploading' + error
-                }                
+                }
             };
 
             if ( this.error ) {
@@ -186,8 +185,8 @@ export default {
                             this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
                         },
                     } )
-                    project.documents.push( { "name": document.name, "url": baseUrl + `${ store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
-                } catch (error) {
+                    project.documents.push( { name: document.name, url: storageUrl + `${ store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
+                } catch ( error ) {
                     this.status = 'Unexpected error while uploading' + error
                 }
             };

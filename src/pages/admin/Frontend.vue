@@ -25,9 +25,9 @@
                 </th>
             </tr>
         </thead>
-    <p>{{ error }}</p>
+        <p>{{ error }}</p>
         <tbody>
-            <tr v-for="project in data" :key=" project.id ">
+            <tr v-for=" project  in data" :key=" project.id ">
                 <td>
                     <router-link :to=" { name: 'Project', params: { title: project.title } } "
                         class="flex flex-wrap font-bold " target="_blank">
@@ -67,15 +67,15 @@
                         </v-list>
 
                         <v-list v-else>
-                            <v-list-item v-if=" !project.isActive && project.type == 'Generals' "
-                                @click=" activate( project.id, null ) ">
-                                <v-icon icon="mdi-bookmark-check-outline"></v-icon> Activate
-                            </v-list-item>
-
+                            
                             <v-list-item
                                 v-if=" ( project.type == 'NodeJs' || project.type == 'WebStatic' ) && !project.isActive "
                                 @click=" deploy( project ) ">
                                 <v-icon icon="mdi-bookmark-check-outline"></v-icon> Deploy Application
+                            </v-list-item>
+                            
+                            <v-list-item v-else @click=" activate( project.id, project.url || null ) ">
+                                <v-icon icon="mdi-bookmark-check-outline"></v-icon> Activate
                             </v-list-item>
                         </v-list>
                     </v-menu>
@@ -148,7 +148,7 @@ export default {
                         username: project.student.user.username,
                         sourceCode: project.sourceCode,
                         runtimeVersion: project.runtimeVersion
-}
+                    }
                 } )
                     .then( ( result ) => {
                         this.activate( project.id, result.url )
@@ -163,7 +163,7 @@ export default {
                         id: project.id,
                         username: project.student.user.username,
                         sourceCode: project.sourceCode,
-}
+                    }
                 } )
                     .then( ( result ) => {
                         this.activate( project.id, result.url )

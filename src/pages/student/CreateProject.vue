@@ -29,7 +29,7 @@
             :rules=" [ v => !!v || 'Url is Required' ] " prepend-icon="mdi-web" clearable />
 
         <v-autocomplete label="Teknologi yang digunakan" v-model=" project.tech " v-model:search=" search.tech "
-            @input=" findTech " :items=" list.tech " item-title="name" :rules=" [ v => !!v || 'Tech is Required' ] "
+            @input=" findTech " :items=" list.tech " item-title="name" item-value="name" :rules=" [ v => !!v || 'Tech is Required' ] "
             placeholder="Start typing then enter search" prepend-icon="mdi-tools" multiple chips closable-chips
             return-object hide-no-data hide-selected />
 
@@ -40,7 +40,7 @@
 
         <v-autocomplete label="jenis Penelitian" v-model=" project.researchField "
             v-model:search=" search.researchField " @input=" findResearchFields " :items=" list.researchField "
-            item-title="name" :rules=" [ v => !!v || 'Reseach Fieldl is Required' ] "
+            item-title="name" item-value="name" :rules=" [ v => !!v || 'Reseach Fieldl is Required' ] "
             placeholder="Start typing then enter search" prepend-icon="mdi-focus-field" multiple chips closable-chips
             return-object hide-no-data hide-selected />
 
@@ -66,6 +66,7 @@
 <script>
 import { Storage, API } from 'aws-amplify'
 import useAuthStore from '../../stores/auth'
+import { storageUrl } from '../../constant/endpoint'
 
 const store = useAuthStore()
 export default {
@@ -125,8 +126,6 @@ export default {
             project.documents = []
             project.images = []
 
-            const baseUrl = 'https://pjj2022-fathoni-etapens-storage.s3.ap-southeast-1.amazonaws.com/public/'
-
             project.tech.forEach( obj => {
                 delete obj.name
             } )
@@ -159,20 +158,18 @@ export default {
 
             // upload
             for ( const image of images ) {
-                await Storage.put( `${ store.user.username }/images/${ image.name }`, image, {
-                    acl: "public-read",
-                    contentType: image.type,
-                    progressCallback: ( progress ) => {
-                        this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
-                    },
-                    errorCallback: ( error ) => {
-                        this.error = 'Unexpected error while uploading' + error
-                    },
-                    completeCallback: ( event ) => {
-                        this.status = `Successfully uploaded ${ event.key }`
-                    },
-                } )
-                project.images.push( baseUrl + `${ store.user.username }/images/${ image.name.replace( / /g, "+" ) }` )
+                try {
+                    await Storage.put( `${ store.user.username }/images/${ image.name }`, image, {
+                        acl: "public-read",
+                        contentType: image.type,
+                        progressCallback: ( progress ) => {
+                            this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
+                        },
+                    } )
+                    project.images.push( storageUrl + `${ store.user.username }/images/${ image.name.replace( / /g, "+" ) }` )
+                } catch ( error ) {
+                    this.status = 'Unexpected error while uploading' + error
+                }                
             };
 
             if ( this.error ) {
@@ -181,20 +178,18 @@ export default {
             }
 
             for ( const document of documents ) {
-                await Storage.put( `${ store.user.username }/documents/${ document.name }`, document, {
-                    acl: "public-read",
-                    contentType: document.type,
-                    progressCallback: ( progress ) => {
-                        this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
-                    },
-                    errorCallback: ( error ) => {
-                        this.error = 'Unexpected error while uploading' + error
-                    },
-                    completeCallback: ( event ) => {
-                        this.status = `Successfully uploaded ${ event.key }`
-                    },
-                } )
-                project.documents.push( { "name": document.name, "url": baseUrl + `${ store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
+                try {
+                    await Storage.put( `${ store.user.username }/documents/${ document.name }`, document, {
+                        acl: "public-read",
+                        contentType: document.type,
+                        progressCallback: ( progress ) => {
+                            this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
+                        },
+                    } )
+                    project.documents.push( { "name": document.name, "url": baseUrl + `${ store.user.username }/documents/${ document.name.replace( / /g, "+" ) }` } )
+                } catch (error) {
+                    this.status = 'Unexpected error while uploading' + error
+                }
             };
 
             if ( this.error ) {

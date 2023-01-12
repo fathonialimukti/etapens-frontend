@@ -1,35 +1,31 @@
 <script setup>
 import { Amplify, Auth } from 'aws-amplify'
-// import awsconfig from './aws-exports.js'
 
 Amplify.configure( {
-  // ...awsconfig,
   Auth: {
-    identityPoolId: 'ap-southeast-1:15232557-2332-448b-87a5-bf7ddb8b5ca5',
-    region: 'ap-southeast-1',
-    userPoolId: 'ap-southeast-1_6Vsn41RIq',
-    userPoolWebClientId: '3ac8lj16iaku2a8n5cnbg4to1j',
+    identityPoolId: 'ap-southeast-1:d4cd7c76-7555-42b1-8087-cd061323ed5f', // REQUIRED - Amazon Cognito Identity Pool ID
+    region: 'ap-southeast-1', // REQUIRED - Amazon Cognito Region
+    userPoolId: 'ap-southeast-1_K041A6i30', // OPTIONAL - Amazon Cognito User Pool ID
+    userPoolWebClientId: '3d2bd9k4ullte6i7isp8m5uri1', // OPTIONAL - Amazon Cognito Web Client ID (26-char alphanumeric string)
   },
-
   Storage: {
     AWSS3: {
-      bucket: 'pjj2022-fathoni-etapens-storage', //REQUIRED -  Amazon S3 bucket name
-      region: 'ap-southeast-3', //OPTIONAL -  Amazon service region
+      bucket: 'etapens-storage140101-dev', //REQUIRED -  Amazon S3 bucket name
+      region: 'ap-southeast-1', //OPTIONAL -  Amazon service region
     }
   },
-
   API: {
     endpoints: [ {
-      name: 'etapens',
-      endpoint: "https://6zbrs7idyb.execute-api.ap-southeast-3.amazonaws.com/prod",
-      region: 'ap-southeast-3',
+      name: "etapens",
+      endpoint: "https://vp7oa3lzqj.execute-api.ap-southeast-1.amazonaws.com/dev",
+      region: "ap-southeast-1",
       custom_header: async () => {
         try {
           return {
             Authorization: `Bearer ${ ( await Auth.currentSession() ).getIdToken().getJwtToken() }`
           }
         } catch ( error ) {
-          console.log(error);
+          console.log( error )
         }
       }
     } ]

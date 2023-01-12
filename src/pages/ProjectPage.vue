@@ -55,7 +55,7 @@
 
       <v-list lines="one">
         <v-list-item v-for="lecturer in project.lecturers" :key=" lecturer.id " :title=" lecturer.name "
-          :subtitle=" lecturer.nip " :prepend-avatar=" lecturer.image || 'https://www.dmarge.com/wp-content/uploads/2021/01/dwayne-the-rock-.jpg' "></v-list-item>
+          :subtitle=" lecturer.nip " :prepend-avatar=" lecturer.image"></v-list-item>
       </v-list>
     </div>
 
@@ -76,7 +76,7 @@
       </dd>
     </div>
     <h2 class="card-title">Discussion</h2>
-    <v-text-field v-if=" isLoggedIn " v-model=" comment " label="Comment" append-inner-icon="mdi-comment"
+    <v-text-field v-if=" store.user.id " v-model=" comment " label="Comment" append-inner-icon="mdi-comment"
       @click:append-inner=" postComment " @keyup.enter=" postComment "></v-text-field>
 
     <v-list lines="one">
@@ -107,9 +107,6 @@ export default {
       project: null,
       store: useAuthStore(),
       comment: null,
-      isLoggedIn: async () => {
-        return await Auth.currentUserInfo()
-      },
     }
   },
   async created () {

@@ -41,7 +41,7 @@
                         </v-textarea>
 
                         <v-file-input v-model=" imageFile " label="Image" variant="filled" prepend-icon="mdi-camera"
-                            color="secondary" accept="image/*"></v-file-input>
+                            color="secondary" accept="image/png"></v-file-input>
 
                         <v-btn color="success" class="mr-4" @click=" submitDosen ">
                             Submit
@@ -55,12 +55,11 @@
 </template>
 
 <script>
+import { storageUrl } from '../constant/endpoint'
 import useAuthStore from '../stores/auth'
 import { API, Storage, Auth } from 'aws-amplify'
 
 const store = useAuthStore()
-const baseUrl = 'https://pjj2022-fathoni-etapens-storage.s3.ap-southeast-1.amazonaws.com/public/'
-
 
 export default {
     data () {
@@ -71,14 +70,14 @@ export default {
                 name: null,
                 nrp: null,
                 bio: null,
-                image: baseUrl + store.user.username + '/profile.png',
+                image: storageUrl + store.user.username + '/profile.png',
                 userId: store.user.id
             },
             newLecturer: {
                 name: null,
                 nip: null,
                 bio: null,
-                image: baseUrl + store.user.username + '/profile.png',
+                image: storageUrl + store.user.username + '/profile.png',
                 userId: store.user.id
             },
             imageFile: null
@@ -86,38 +85,36 @@ export default {
     },
     methods: {
         async submitMahasiswa () {
-            await this.upload()
-            // const { valid } = await this.$refs.form.validate()
+            const { valid } = await this.$refs.form.validate()
 
-            // if ( !valid ) return
+            if ( !valid ) return
 
-            // await API.post( 'etapens', '/student/create', {
-            //     body: this.newStudent
-            // } )
-            //     .then( async () => {
-            //         console.log( "Success" );
-            //         await this.upload()
-            //     } )
-            //     .catch( ( result ) => {
-            //         console.log( "Error" );
-            //         this.status = result.message
-            //     } )
+            await API.post( 'etapens', '/student/create', {
+                body: this.newStudent
+            } )
+                .then( async () => {
+                    console.log( "Success" );
+                    await this.upload()
+                } )
+                .catch( ( result ) => {
+                    console.log( "Error" );
+                    this.status = result.message
+                } )
         },
         async upload () {
             const image = this.imageFile[ 0 ]
-            await Storage.put( `${ store.user.username }/profile.png`, image, {
-                acl: 'public-read',
-                progressCallback: ( progress ) => {
-                    this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
-                },
-                errorCallback: ( err ) => {
-                    this.status = 'Unexpected error while uploading' + err
-                },
-                completeCallback: async ( event ) => {
-                    this.status = `Successfully uploaded ${ event.key }`
-                    await this.setAuth()
-                },
-            } )
+            try {
+                await Storage.put( `${ store.user.username }/profile.png`, image, {
+                    acl: 'public-read',
+                    contentType: image.type,
+                    progressCallback: ( progress ) => {
+                        this.status = `Uploaded: ${ progress.loaded }/${ progress.total }`
+                    },
+                } )
+                await this.setAuth()
+            } catch ( error ) {
+                this.status = 'Unexpected error while uploading' + error
+            }
         },
         async submitDosen () {
             const { valid } = await this.$refs.form.validate()
